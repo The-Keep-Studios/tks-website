@@ -54,11 +54,8 @@
 	<?php 
 		if (get_theme_mod('social')) :
 		get_template_part('social');
-		endif;
-		
+		endif;	
 	?>
-
-
 	</div>
 
 <div id="page" class="hfeed site container">

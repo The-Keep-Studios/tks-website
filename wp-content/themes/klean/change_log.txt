@@ -38,3 +38,7 @@
 		v1.10	- 1. Reverted to the old Social icons format
 			  2. Improved the 404 page
 			  3. Fixed other small bugs
+
+		v1.11	- 1. Centre aligned the navigation menu
+			  2. Updated Bootstrap
+			  3. Minor CSS changes and bug fixes

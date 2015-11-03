@@ -192,6 +192,8 @@ body:not(.blog) {
 		li {
 			margin: 0px 15px;
 			padding: 15px 0px;
+			display: inline-block;
+			float: none;
 			ul {
 				background: transparent;
 				box-shadow: none;
@@ -205,6 +207,7 @@ body:not(.blog) {
 					width: 150px;
 					margin: 0px;
 					padding: 8px 10px;
+					text-align: left;
 					background: rgba(0,0,0,.4);
 					ul {
 					margin-top: -1px;
@@ -218,6 +221,16 @@ body:not(.blog) {
 		opacity: 1;
 	}
 }
+
+.main-navigation ul.nav-menu {
+	text-align: center;
+}
+
+.main-navigation ul > li {
+	float: none;
+	display: inline-block;
+}
+
 
 .slicknav_menu {
 	position: absolute;
@@ -280,7 +293,7 @@ body:not(.blog) {
 		font-size: 22px;
 		text-transform: uppercase;
 		font-variant: small-caps !important;
-		font-weight: 400;
+		font-weight: 700;
 		padding: 10px 0;
 		text-align: center;
 		margin-top: 10px;
@@ -628,13 +641,12 @@ body:not(.blog) {
 	background: #eee;
 	.widget {
 		h1.widget-title {
-			padding: 10px 2px;
+			padding: 10px;
 			margin-top: 25px;
-			text-align: center;
-			font-size: 18px;
+			font-size: 22px;
 			color: #000;
 			font-weight: 400;
-			text-transform: uppercase;
+			font-variant: small-caps;
 			margin-bottom: 0px;
 		}
 		& > ul {

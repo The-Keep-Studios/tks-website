@@ -172,6 +172,8 @@ body:not(.blog) #social-icons i {
 .main-navigation ul li {
   margin: 0px 15px;
   padding: 15px 0px;
+  display: inline-block;
+  float: none;
 }
 .main-navigation ul li ul {
   background: transparent;
@@ -187,6 +189,7 @@ body:not(.blog) #social-icons i {
   width: 150px;
   margin: 0px;
   padding: 8px 10px;
+  text-align: left;
   background: rgba(0, 0, 0, 0.4);
 }
 .main-navigation ul li ul li ul {
@@ -195,6 +198,13 @@ body:not(.blog) #social-icons i {
 }
 .main-navigation li:hover > ul {
   opacity: 1;
+}
+.main-navigation ul.nav-menu {
+  text-align: center;
+}
+.main-navigation ul > li {
+  float: none;
+  display: inline-block;
 }
 .slicknav_menu {
   position: absolute;
@@ -253,7 +263,7 @@ body:not(.blog) #social-icons i {
   font-size: 22px;
   text-transform: uppercase;
   font-variant: small-caps !important;
-  font-weight: 400;
+  font-weight: 700;
   padding: 10px 0;
   text-align: center;
   margin-top: 10px;
@@ -598,13 +608,12 @@ body:not(.blog) .site-branding h2.site-description {
   background: #eee;
 }
 #secondary .widget h1.widget-title {
-  padding: 10px 2px;
+  padding: 10px;
   margin-top: 25px;
-  text-align: center;
-  font-size: 18px;
+  font-size: 22px;
   color: #000;
   font-weight: 400;
-  text-transform: uppercase;
+  font-variant: small-caps;
   margin-bottom: 0px;
 }
 #secondary .widget > ul {
