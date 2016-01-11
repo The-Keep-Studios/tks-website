@@ -42,3 +42,9 @@
 		v1.11	- 1. Centre aligned the navigation menu
 			  2. Updated Bootstrap
 			  3. Minor CSS changes and bug fixes
+
+		v1.12	- 1. Updated the screenshot
+			  2. Added a scroll down button
+			  3. Minor Bug Fixes
+
+		v1.13	- 1. Updated Font Awesome

@@ -478,8 +478,8 @@ function klean_customize_register( $wp_customize ) {
 	$wp_customize-> add_section(
     'klean_pro',
     array(
-    	'title'			=> __('GO PRO !!!','klean'),
-    	'description'	=> __('<i>Now you can upgrade to Klean Pro and unlock the full features of the theme. <br><br>The pro version is available at only $25.<br><br><b>To purchase the Pro version, go <a href="http://www.divjot.co/product/super-klean">here</a>.</b></i>','klean'),
+    	'title'			=> __('Upgrade to Pro !!!','klean'),
+    	'description'	=> __('<i>If you liked the theme, you can upgrade to Super Klean and unlock the full features of the theme. <br><br>Super Klean offers a multitude of features such as Featured Area, Slider and Video support for Header, Multiple Layouts and much more along with dedicated support for the theme. <br><br><b>You can check out the Premium Version <a href="http://www.divjot.co/product/super-klean">here</a>.</b></i>','klean'),
     	'priority'		=> 999,
     	)
     );

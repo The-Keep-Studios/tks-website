@@ -57,6 +57,12 @@
 		endif;	
 	?>
 	</div>
+	
+	<?php if (is_front_page() ): ?>
+	<div id="scroll-arrow">
+		<i class="fa fa-chevron-down"></i>
+	</div>
+	<?php endif; ?>
 
 <div id="page" class="hfeed site container">
 		<a class="skip-link screen-reader-text" href="#content"><?php _e( 'Skip to content', 'klean' ); ?></a>

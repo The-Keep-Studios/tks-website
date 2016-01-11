@@ -46,10 +46,9 @@ a, a:visited, a:hover, a:active {
 			margin: auto;
 		}
 		.site-title {
-			border-radius: 4px;
 			display: inline-block;
 			padding: 10px 20px;
-			background: rgba(255,255,255,.4);
+			background: rgba(255,255,255,.3);
 			a {
 				text-decoration: none;
 				color: black;
@@ -58,9 +57,8 @@ a, a:visited, a:hover, a:active {
 		.site-description {
 			display: inline-block;
 			font-size: 16px;
-			background: rgba(255,255,255,.4);
+			background: rgba(255,255,255,.3);
 			padding: 10px 20px;
-			border-radius: 4px;
 		}
 	}
 }
@@ -135,6 +133,18 @@ body:not(.blog) .site-branding {
 			color: black;
 		}
 	}
+}
+
+#scroll-arrow {
+	position: absolute;
+	right: 5%;
+	z-index: 999;
+	bottom: 20px;
+	color: white;
+	cursor: pointer;
+	padding: 20px;
+	background: rgba(0,0,0,0.5);
+	border-radius: 10px;
 }
 
 body:not(.blog) {
@@ -1009,12 +1019,14 @@ body:not(.home):not(.front-page) {
 		}
 	}
 	#respond {
+		text-align: center;
 		.comment-form-comment {
 			label {
 				text-transform: uppercase;
 			}
 			textarea {
 				border-radius: 0px !important;
+				outline: none;
 			}
 		}
 		.form-submit {

@@ -94,6 +94,11 @@ function klean_customizer_stylesheet() {
 add_action( 'customize_controls_print_styles', 'klean_customizer_stylesheet' );
 
 
+function klean_add_editor_styles() {
+    add_editor_style( 'editor-style.css' );
+}
+add_action( 'admin_init', 'klean_add_editor_styles' );
+
 
 /** 
  *Enqueuing  the fonts
@@ -211,6 +216,8 @@ function klean_scripts() {
 	wp_enqueue_script( 'klean-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20120206', true );
 	
 	wp_enqueue_script( 'klean-menu-js', get_template_directory_uri() . '/js/jquery.slicknav.min.js', array(), true );
+	
+	wp_enqueue_script( 'klean-custom-js', get_template_directory_uri() . '/js/custom.js', array(), true );
 
 	wp_enqueue_script( 'klean-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20130115', true );
 
