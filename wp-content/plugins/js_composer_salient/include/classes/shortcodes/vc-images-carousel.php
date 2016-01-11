@@ -1,6 +1,8 @@
 <?php
 
-class WPBakeryShortCode_VC_images_carousel extends WPBakeryShortCode_VC_gallery {
+require_once vc_path_dir( 'SHORTCODES_DIR', 'vc-gallery.php' );
+
+class WPBakeyrShortCode_VC_images_carousel extends WPBakeryShortCode_VC_gallery {
 	protected static $carousel_index = 1;
 
 	public function __construct( $settings ) {

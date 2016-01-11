@@ -20,6 +20,9 @@
  * @var $this WPBakeryShortCode_VC_Message
  */
 
+$el_class = $message_box_color = $message_box_style = $style = $css = $color = $css_animation = $icon_type = '';
+$icon_fontawesome = $icon_linecons = $icon_openiconic = $icon_typicons = $icon_entypo = '';
+
 $atts = $this->convertAttributesToMessageBox2( $atts );
 $atts = vc_map_get_attributes( $this->getShortcode(), $atts );
 extract( $atts );

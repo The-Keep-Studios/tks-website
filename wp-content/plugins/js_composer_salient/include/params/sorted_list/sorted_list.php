@@ -176,4 +176,4 @@ function vc_add_teaser_box_generator( $attributes ) {
 	return $attributes;
 }
 
-//add_filter( 'vc_mapper_attribute_sorted_list', 'vc_add_teaser_box_generator' );
+add_filter( 'vc_mapper_attribute_sorted_list', 'vc_add_teaser_box_generator' );

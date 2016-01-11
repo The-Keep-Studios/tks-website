@@ -19,6 +19,9 @@
  * @var $this WPBakeryShortCode_VC_gallery
  */
 
+$title = $source = $type = $onclick = $custom_links = $custom_links_target = $img_size = $external_img_size = $images = $custom_srcs = $el_class = $interval = $css = '';
+$large_img_src = '';
+ 
 $attributes = vc_map_get_attributes( $this->getShortcode(), $atts );
 extract( $attributes );
 

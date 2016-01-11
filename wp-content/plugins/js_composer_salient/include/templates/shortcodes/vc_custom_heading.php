@@ -15,6 +15,7 @@
  * @var $this WPBakeryShortCode_VC_Custom_heading
  */
 
+$source = $text = $link = $google_fonts = $font_container = $el_class = $css = $font_container_data = $google_fonts_data = '';
 // This is needed to extract $font_container_data and $google_fonts_data
 extract( $this->getAttributes( $atts ) );
 
@@ -48,8 +49,8 @@ if ( ! empty( $link ) ) {
 	$link = vc_build_link( $link );
 	$text = '<a href="' . esc_attr( $link['url'] ) . '"'
 	        . ( $link['target'] ? ' target="' . esc_attr( $link['target'] ) . '"' : '' )
-	        . ( $link['title'] ? ' title="' . esc_attr( $link['title'] ) . '"' : '' )
-	        . '>' . $text . '</a>';
+			. ( $link['title'] ? ' title="' . esc_attr( $link['title'] ) . '"' : '' )
+			. '>' . $text . '</a>';
 }
 
 $output = '';

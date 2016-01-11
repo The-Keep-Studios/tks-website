@@ -24,6 +24,9 @@
  * @var $this WPBakeryShortCode_VC_Single_image
  */
 
+$title = $source = $image = $custom_src = $onclick = $img_size = $external_img_size =
+$caption = $img_link_large = $link = $img_link_target = $alignment = $el_class = $css_animation = $style = $external_style = $border_color = $css = '';
+
 $atts = vc_map_get_attributes( $this->getShortcode(), $atts );
 extract( $atts );
 

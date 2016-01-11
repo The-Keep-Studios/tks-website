@@ -12,6 +12,7 @@
  * Shortcode class
  * @var $this WPBakeryShortCode_VC_Button2
  */
+$link = $title = $color = $size = $style = $el_class = $align = '';
 $wrapper_start = $wrapper_end = '';
 $atts = vc_map_get_attributes( $this->getShortcode(), $atts );
 extract( $atts );

@@ -443,6 +443,9 @@ if ( ! class_exists( 'Vc_Automapper' ) ) {
 		 *
 		 */
 		public function goAction() {
+			if ( ! vc_verify_admin_nonce() || ! current_user_can( 'manage_options' ) ) {
+				die();
+			}
 			$action = vc_post_param( 'vc_action' );
 			$this->result( $this->$action() );
 		}

@@ -113,7 +113,8 @@ jQuery( document ).ready( function ( $ ) {
 				action: 'activated' === status ? 'wpb_deactivate_license' : 'wpb_activate_license',
 				username: $username.val(),
 				key: $key.val(),
-				api_key: $api_key.val()
+				api_key: $api_key.val(),
+				_vcnonce: window.vcAdminNonce
 			}
 		} ).done( function ( data ) {
 			var code;
@@ -206,7 +207,8 @@ jQuery( document ).ready( function ( $ ) {
 	$( '#vc_settings-vc-pointers-reset' ).click( function ( e ) {
 		e.preventDefault();
 		$.post( window.ajaxurl, {
-			action: 'vc_pointer_reset'
+			action: 'vc_pointer_reset',
+			_vcnonce: window.vcAdminNonce
 		} );
 		$( this ).text( $( this ).data( 'vcDoneTxt' ) );
 	} );

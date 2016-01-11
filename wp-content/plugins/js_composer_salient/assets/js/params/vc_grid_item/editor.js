@@ -48,10 +48,11 @@
 		// Create content
 		$form = $( '<form id="vc_gitem-preview-form" action="' + encodeURI( ajaxurl ) + '" method="post"'
 		+ ' target="vc_gitem-preview-iframe" style="position: absolute;visibility: hidden;right: 0; bottom:0">'
-		+ '<input type="hidden" name="action" value="vc_gitem_preview">'
-		+ '<input type="hidden" id="vc_gitem-preview-form-shortcode-string" name="shortcodes_string">'
-		+ '<input type="hidden" name="post_id">'
-		+ '<input type="submit" name="submit">' ).prependTo( 'body' );
+			+ '<input type="hidden" name="action" value="vc_gitem_preview">'
+			+ '<input type="hidden" id="vc_gitem-preview-form-shortcode-string" name="shortcodes_string">'
+			+ '<input type="hidden" name="post_id">'
+			+ '<input type="hidden" name="_vcnonce" value="' + window.vcAdminNonce + '">'
+			+ '<input type="submit" name="submit">' ).prependTo( 'body' );
 		// Set values
 		$form.find( '[name="post_id"]' ).val( $( '#post_ID' ).val() );
 		$form.find( '[name="shortcodes_string"]' ).val( vc.storage.getContent() );
@@ -175,9 +176,100 @@
 			vc_grid_item_editor: 'true',
 			tag: this.model.get( 'shortcode' ),
 			post_id: $( '#post_ID' ).val(),
-			params: this.model.get( 'params' )
+			params: this.model.get( 'params' ),
+			_vcnonce: window.vcAdminNonce
 		};
 	};
+	vc.EditElementPanelView.prototype.fetchSaveSettingsDialogAjaxData = function () {
+		return {
+			action: 'vc_action_render_settings_preset_title_prompt',
+			vc_inline: true,
+			vc_grid_item_editor: true,
+			_vcnonce: window.vcAdminNonce
+		};
+	};
+	vc.EditElementPanelView.prototype.saveSettingsAjaxData = function ( shortcode_name, title, is_default, data ) {
+		return {
+			action: 'vc_action_save_settings_preset',
+			shortcode_name: shortcode_name,
+			is_default: is_default ? 1 : 0,
+			vc_inline: true,
+			title: title,
+			data: data,
+			vc_grid_item_editor: true,
+			_vcnonce: window.vcAdminNonce
+		};
+	};
+	vc.EditElementPanelView.prototype.fetchSaveSettingsDialogAjaxData = function () {
+		return {
+			action: 'vc_action_render_settings_preset_title_prompt',
+			vc_inline: true,
+			vc_grid_item_editor: true,
+			_vcnonce: window.vcAdminNonce
+		};
+	};
+	vc.EditElementPanelView.prototype.loadSettingsAjaxData = function ( id ) {
+		return {
+			action: 'vc_action_get_settings_preset',
+			vc_inline: true,
+			id: id,
+			vc_grid_item_editor: true,
+			_vcnonce: window.vcAdminNonce
+		};
+	};
+	vc.EditElementPanelView.prototype.deleteSettingsAjaxData = function ( shortcode_name, id ) {
+		return {
+			action: 'vc_action_delete_settings_preset',
+			shortcode_name: shortcode_name,
+			vc_inline: true,
+			id: id,
+			vc_grid_item_editor: true,
+			_vcnonce: window.vcAdminNonce
+		}
+	};
+	vc.EditElementPanelView.prototype.saveAsDefaultSettingsAjaxData = function ( shortcode_name ) {
+		return {
+			action: 'vc_action_set_as_default_settings_preset',
+			shortcode_name: shortcode_name,
+			id: this.settingsPresetId,
+			vc_inline: true,
+			vc_grid_item_editor: true,
+			_vcnonce: window.vcAdminNonce
+		};
+	};
+	vc.EditElementPanelView.prototype.restoreDefaultSettingsAjaxData = function ( shortcode_name ) {
+		return {
+			action: 'vc_action_restore_default_settings_preset',
+			shortcode_name: shortcode_name,
+			vc_inline: true,
+			vc_grid_item_editor: true,
+			_vcnonce: window.vcAdminNonce
+		};
+	};
+	vc.EditElementPanelView.prototype.reloadSettingsMenuContentAjaxData = function ( shortcode_name ) {
+		return {
+			action: 'vc_action_render_settings_preset_popup',
+			shortcode_name: shortcode_name,
+			vc_inline: true,
+			vc_grid_item_editor: true,
+			_vcnonce: window.vcAdminNonce
+		};
+	};
+	vc.EditElementPanelView.prototype.renderSettingsPresetAjaxData = function ( params ) {
+		var parent_id;
+
+		parent_id = this.model.get( 'parent_id' );
+
+		return {
+			action: 'vc_edit_form',
+			tag: this.model.get( 'shortcode' ),
+			parent_tag: parent_id ? this.model.collection.get( parent_id ).get( 'shortcode' ) : null,
+			post_id: $( '#post_ID' ).val(),
+			params: params,
+			vc_grid_item_editor: true,
+			_vcnonce: window.vcAdminNonce
+ 		};
+ 	};
 	window.VcGitemView = window.VcColumnView.extend( {
 		animatedBlock: false,
 		cZone: false,
@@ -421,7 +513,7 @@
 		addTab: function ( zone, id ) {
 			var $zone = $( '<li class="vc_gitem-animated-block-tab vc_gitem-tab-'
 			+ zone + '"><a href="#" data-vc-gitem-tab-link="' + zone + '"><span class="vc_label">' + this.getZoneLabel( zone )
-			+ '</span></a><a class="vc_control column_edit" data-vc-control="edit" data-vc-zone-model-id="' + id + '"><span class="vc_icon"></span></a></li>' );
+				+ '</span></a><a class="vc_control column_edit" data-vc-control="edit" data-vc-zone-model-id="' + id + '"><span class="vc_icon"></span></a></li>' );
 			$zone.appendTo( '[data-vc-gitem-animated-block="tabs"]' );
 			'a' === zone && this.switchZone( $zone.find( 'a' ) );
 		},

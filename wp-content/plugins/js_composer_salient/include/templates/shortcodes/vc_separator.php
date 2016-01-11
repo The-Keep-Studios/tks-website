@@ -13,6 +13,7 @@
  * Shortcode class
  * @var $this WPBakeryShortCode_VC_Separator
  */
+$el_width = $style = $color = $border_width = $accent_color = $el_class = $align = $css = '';
 $atts = vc_map_get_attributes( $this->getShortcode(), $atts );
 extract( $atts );
 

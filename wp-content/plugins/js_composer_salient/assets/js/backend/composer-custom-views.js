@@ -939,6 +939,9 @@
              } else if(this.model.get('shortcode') === 'carousel'){
                 tab_title = window.i18nLocale.item;
                 vc.shortcodes.create({shortcode:'item', params:{title:tab_title, id:tab_id}, parent_id:this.model.id});
+             } else if(this.model.get('shortcode') === 'page_submenu'){
+                tab_title = window.i18nLocale.page_link;
+                vc.shortcodes.create({shortcode:'page_link', params:{title:tab_title, id:tab_id}, parent_id:this.model.id});
              }
              else {
                 tab_title = this.model.get('shortcode') === 'vc_tour' ? window.i18nLocale.slide : window.i18nLocale.tab;
@@ -984,7 +987,8 @@
                 if(!params.title && this.model.get('shortcode') === 'pricing_table') params.title = window.i18nLocale.column;
                 if(!params.title && this.model.get('shortcode') === 'carousel') params.title = window.i18nLocale.item;
                 if(!params.title && this.model.get('shortcode') === 'clients') params.title = window.i18nLocale.client;
-
+				if(!params.title && this.model.get('shortcode') === 'page_submenu') params.title = window.i18nLocale.page_link;
+				
                 var cloned_from = view.model.get('cloned_from'),
                     $tab_controls = $('.tabs_controls > .add_tab_block', this.$content),
 	                $new_tab = $("<li><a href='#tab-" + params.id + "'>" + params.title + "</a></li>").insertBefore($tab_controls);
@@ -996,6 +1000,7 @@
                 if(!params.title && this.model.get('shortcode') === 'pricing_table') params.title = window.i18nLocale.column;
                 if(!params.title && this.model.get('shortcode') === 'carousel') params.title = window.i18nLocale.item;
                 if(!params.title && this.model.get('shortcode') === 'clients') params.title = window.i18nLocale.client;
+                if(!params.title && this.model.get('shortcode') === 'page_submenu') params.title = window.i18nLocale.page_link;
 
                 $("<li><a href='#tab-" + params.id + "'>" + params.title + "</a></li>")
                     .insertBefore(this.$add_button);
@@ -1018,6 +1023,7 @@
             if (model.get('shortcode') === 'pricing_column') _.extend(new_params, {id:+new Date() + '-' + this.$tabs.find('[data-element-type=pricing_column]').length + '-' + Math.floor(Math.random() * 11)});
             if (model.get('shortcode') === 'testimonial') _.extend(new_params, {id:+new Date() + '-' + this.$tabs.find('[data-element-type=testimonial]').length + '-' + Math.floor(Math.random() * 11)});
             if (model.get('shortcode') === 'client') _.extend(new_params, {id:+new Date() + '-' + this.$tabs.find('[data-element-type=client]').length + '-' + Math.floor(Math.random() * 11)});
+            if (model.get('shortcode') === 'page_link') _.extend(new_params, {id:+new Date() + '-' + this.$tabs.find('[data-element-type=page_link]').length + '-' + Math.floor(Math.random() * 11)});
             
             if (model.get('shortcode') === 'tab') { 
                 model_clone = Shortcodes.create({shortcode:model.get('shortcode'), id:vc_guid(), parent_id:parent_id, order:new_order, cloned:(model.get('shortcode') === 'tab' ? false : true), cloned_from:model.toJSON(), params:new_params});
@@ -1039,7 +1045,12 @@
                 _.each(Shortcodes.where({parent_id:model.id}), function (shortcode) {
                     this.cloneModel(shortcode, model_clone.get('id'), true);
                 }, this);
-            } else if (model.get('shortcode') === 'item') { 
+            } else if (model.get('shortcode') === 'page_link') { 
+                model_clone = Shortcodes.create({shortcode:model.get('shortcode'), id:vc_guid(), parent_id:parent_id, order:new_order, cloned:(model.get('shortcode') === 'page_link' ? false : true), cloned_from:model.toJSON(), params:new_params});
+                _.each(Shortcodes.where({parent_id:model.id}), function (shortcode) {
+                    this.cloneModel(shortcode, model_clone.get('id'), true);
+                }, this);
+            }  else if (model.get('shortcode') === 'item') { 
                 model_clone = Shortcodes.create({shortcode:model.get('shortcode'), id:vc_guid(), parent_id:parent_id, order:new_order, cloned:(model.get('shortcode') === 'item' ? false : true), cloned_from:model.toJSON(), params:new_params});
                 _.each(Shortcodes.where({parent_id:model.id}), function (shortcode) {
                     this.cloneModel(shortcode, model_clone.get('id'), true);
@@ -1122,7 +1133,7 @@
             var shortcodes_to_resort = [],
                 new_order = _.isBoolean(save_order) && save_order === true ? model.get('order') : parseFloat(model.get('order')) + vc.clone_index,
                 new_params = _.extend({}, model.get('params'));
-            if (model.get('shortcode') === 'tab' || model.get('shortcode') === 'client' || model.get('shortcode') === 'pricing_column' || model.get('shortcode') === 'item') _.extend(new_params, {id:+new Date() + '-' + this.$tabs.find('[data-element_type=tab]').length + '-' + Math.floor(Math.random() * 11)});
+            if (model.get('shortcode') === 'tab' || model.get('shortcode') === 'client' || model.get('shortcode') === 'page_link' ||  model.get('shortcode') === 'testimonial' || model.get('shortcode') === 'pricing_column' || model.get('shortcode') === 'item') _.extend(new_params, {id:+new Date() + '-' + this.$tabs.find('[data-element_type=tab]').length + '-' + Math.floor(Math.random() * 11)});
             var model_clone = Shortcodes.create({shortcode:model.get('shortcode'), parent_id:parent_id, order:new_order, cloned:true, cloned_from:model.toJSON(), params:new_params});
             _.each(Shortcodes.where({parent_id:model.id}), function (shortcode) {
                 this.cloneModel(shortcode, model_clone.id, true);
@@ -1172,6 +1183,7 @@
                 if(this.model.get('shortcode') === 'carousel') tab_title = window.i18nLocale.item;
                 if(this.model.get('shortcode') === 'pricing_table') tab_title = window.i18nLocale.column;
                 if(this.model.get('shortcode') === 'clients') tab_title = window.i18nLocale.client;
+                if(this.model.get('shortcode') === 'page_submenu') tab_title = window.i18nLocale.page_link;
 
             vc.shortcodes.create({shortcode:'tab', params:{title:tab_title, tab_id:tab_id}, parent_id:this.model.id});
 

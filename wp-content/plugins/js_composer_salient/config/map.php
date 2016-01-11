@@ -48,7 +48,7 @@ $vc_add_css_animation = array(
 	'description' => __( 'Select type of animation for element to be animated when it "enters" the browsers viewport (Note: works only in modern browsers).', 'js_composer' )
 );
 
-vc_map( array(
+/*vc_map( array(
 	'name' => __( 'Row', 'js_composer' ),
 	'base' => 'vc_row',
 	'is_container' => true,
@@ -163,7 +163,7 @@ vc_map( array(
 		)
 	),
 	'js_view' => 'VcRowView'
-) );
+) ); */
 
 vc_map( array(
 	'name' => __( 'Row', 'js_composer' ), //Inner Row
@@ -226,6 +226,7 @@ $vc_column_width_list = array(
  *     wp-content/plugins/js_composer/assets/js/backend/composer-custom-views.js/window.VcColumnView - custom backend
  *     shortcode view.
  */
+/*
 vc_map( array(
 	'name' => __( 'Column', 'js_composer' ),
 	'base' => 'vc_column',
@@ -301,6 +302,7 @@ vc_map( array(
 	),
 	"js_view" => 'VcColumnView'
 ) );
+*/
 /* Text Block
 ---------------------------------------------------------- */
 vc_map( array(
@@ -560,6 +562,7 @@ unset( $vc_add_css_animation_no_label['admin_label'] );
  * @since 4.4
  * New message box shortcode (replaces old)
  */
+/*
 vc_map( array(
 	'name' => __( 'Message Box', 'js_composer' ),
 	'base' => 'vc_message',
@@ -808,9 +811,10 @@ vc_map( array(
 	),
 	'js_view' => 'VcMessageView_Backend'
 ) );
-
+*/
 /* Facebook like button
 ---------------------------------------------------------- */
+/*
 vc_map( array(
 	'name' => __( 'Facebook Like', 'js_composer' ),
 	'base' => 'vc_facebook',
@@ -837,10 +841,11 @@ vc_map( array(
 			'group' => __( 'Design Options', 'js_composer' )
 		),
 	)
-) );
+) ); */
 
 /* Tweetmeme button
 ---------------------------------------------------------- */
+/*
 vc_map( array(
 	'name' => __( 'Tweetmeme Button', 'js_composer' ),
 	'base' => 'vc_tweetmeme',
@@ -868,10 +873,11 @@ vc_map( array(
 			'group' => __( 'Design Options', 'js_composer' )
 		),
 	)
-) );
+) ); */
 
 /* Google+ button
 ---------------------------------------------------------- */
+/*
 vc_map( array(
 	'name' => __( 'Google+ Button', 'js_composer' ),
 	'base' => 'vc_googleplus',
@@ -922,10 +928,11 @@ vc_map( array(
 			'group' => __( 'Design Options', 'js_composer' )
 		),
 	)
-) );
+) ); */
 
 /* Pinterest button
 ---------------------------------------------------------- */
+/*
 vc_map( array(
 	'name' => __( 'Pinterest', 'js_composer' ),
 	'base' => 'vc_pinterest',
@@ -952,7 +959,7 @@ vc_map( array(
 			'group' => __( 'Design Options', 'js_composer' )
 		),
 	)
-) );
+) ); */
 
 /* Toggle 2
 ---------------------------------------------------------- */
@@ -1518,6 +1525,7 @@ include_once "shortcode-vc-tta-section.php";
 
 /* Tabs
 ---------------------------------------------------------- */
+/*
 $tab_id_1 = ''; // 'def' . time() . '-1-' . rand( 0, 100 );
 $tab_id_2 = ''; // 'def' . time() . '-2-' . rand( 0, 100 );
 vc_map( array(
@@ -1564,9 +1572,10 @@ vc_map( array(
 ',
 	'js_view' => $vc_is_wp_version_3_6_more ? 'VcTabsView' : 'VcTabsView35'
 ) );
-
+*/
 /* Tour section
 ---------------------------------------------------------- */
+/*
 $tab_id_1 = ''; // time() . '-1-' . rand( 0, 100 );
 $tab_id_2 = ''; // time() . '-2-' . rand( 0, 100 );
 vc_map( array(
@@ -1638,9 +1647,10 @@ vc_map( array(
 	),
 	'js_view' => $vc_is_wp_version_3_6_more ? 'VcTabView' : 'VcTabView35'
 ) );
-
+*/
 /* Accordion block
 ---------------------------------------------------------- */
+/*
 vc_map( array(
 	'name' => __( 'Accordion', 'js_composer' ),
 	'base' => 'vc_accordion',
@@ -1722,7 +1732,7 @@ vc_map( array(
 		),
 	),
 	'js_view' => 'VcAccordionTabView'
-) );
+) ); */
 
 /* Posts Grid
 ---------------------------------------------------------- */
@@ -2176,6 +2186,8 @@ $icons_arr = array(
 	__( 'Video icon', 'js_composer' ) => "wpb_video"
 );
 
+/*
+
 vc_map( array(
 	'name' => __( 'Button', 'js_composer' ) . " 1",
 	'base' => 'vc_button',
@@ -2311,9 +2323,11 @@ vc_map( array(
 	),
 	'js_view' => 'VcButton2View'
 ) );
+*/
 
 /* Call to Action Button
 ---------------------------------------------------------- */
+/*
 vc_map( array(
 	'name' => __( 'Call to Action', 'js_composer' ),
 	'base' => 'vc_cta_button',
@@ -2510,7 +2524,7 @@ vc_map( array(
 		)
 	)
 ) );
-
+*/
 /* Video element
 ---------------------------------------------------------- */
 vc_map( array(
@@ -2551,6 +2565,7 @@ vc_map( array(
 
 /* Google maps element
 ---------------------------------------------------------- */
+/*
 vc_map( array(
 	'name' => __( 'Google Maps', 'js_composer' ),
 	'base' => 'vc_gmaps',
@@ -2594,6 +2609,7 @@ vc_map( array(
 		),
 	)
 ) );
+*/
 
 /* Raw HTML
 ---------------------------------------------------------- */
@@ -2657,6 +2673,7 @@ vc_map( array(
 
 /* Flickr
 ---------------------------------------------------------- */
+/*
 vc_map( array(
 	'base' => 'vc_flickr',
 	'name' => __( 'Flickr Widget', 'js_composer' ),
@@ -2719,7 +2736,7 @@ vc_map( array(
 		),
 	)
 ) );
-
+*/
 /* Graph
 ---------------------------------------------------------- */
 vc_map( array(
@@ -3244,6 +3261,7 @@ vc_map( array(
 
 /* WordPress default Widgets (Appearance->Widgets)
 ---------------------------------------------------------- */
+/*
 vc_map( array(
 	'name' => 'WP ' . __( 'Search' ),
 	'base' => 'vc_wp_search',
@@ -3395,8 +3413,8 @@ vc_map( array(
 ) );
 
 $tag_taxonomies = array();
-if ( 'vc_edit_form' === vc_post_param( 'action' ) ) {
-	$taxonomies = get_taxonomies();
+if ( 'vc_edit_form' === vc_post_param( 'action' ) && vc_verify_admin_nonce() ) {
+	$taxonomies = ($is_admin) ? get_taxonomies() : null;
 	if ( is_array( $taxonomies ) && ! empty( $taxonomies ) ) {
 		foreach ( $taxonomies as $taxonomy ) {
 			$tax = get_taxonomy( $taxonomy );
@@ -3442,7 +3460,7 @@ vc_map( array(
 ) );
 
 $custom_menus = array();
-$menus = get_terms( 'nav_menu', array( 'hide_empty' => false ) );
+$menus = (is_admin()) ? get_terms( 'nav_menu', array( 'hide_empty' => false ) ) : null;
 if ( is_array( $menus ) && ! empty( $menus ) ) {
 	foreach ( $menus as $single_menu ) {
 		if ( is_object( $single_menu ) && isset( $single_menu->name, $single_menu->term_id ) ) {
@@ -3554,7 +3572,7 @@ vc_map( array(
 ) );
 
 $link_category = array( __( 'All Links', 'js_composer' ) => '' );
-$link_cats = get_terms( 'link_category' );
+$link_cats = (is_admin()) ? get_terms( 'link_category' ) : null;
 if ( is_array( $link_cats ) && ! empty( $link_cats ) ) {
 	foreach ( $link_cats as $link_cat ) {
 		if ( is_object( $link_cat ) && isset( $link_cat->name, $link_cat->term_id ) ) {
@@ -3758,6 +3776,7 @@ vc_map( array(
 		)
 	)
 ) );
+*/
 
 /* Empty Space Element
 ---------------------------------------------------------- */
@@ -3893,7 +3912,9 @@ include_once "shortcode-vc-btn.php";
 
 include_once "shortcode-vc-cta3.php";
 
-$post_types = get_post_types( array() );
+
+
+$post_types = (is_admin()) ? get_post_types( array() ) : null;
 $post_types_list = array();
 if ( is_array( $post_types ) && ! empty( $post_types ) ) {
 	foreach ( $post_types as $post_type ) {
@@ -3908,7 +3929,7 @@ $post_types_list[] = array( 'ids', __( 'List of IDs', 'js_composer' ) );
 
 $taxonomies_for_filter = array();
 
-if ( 'vc_edit_form' === vc_post_param( 'action' ) ) {
+if ( 'vc_edit_form' === vc_post_param( 'action' ) && vc_verify_admin_nonce() ) {
 	$vc_taxonomies_types = vc_taxonomies_types();
 	if ( is_array( $vc_taxonomies_types ) && ! empty( $vc_taxonomies_types ) ) {
 		foreach ( $vc_taxonomies_types as $t => $data ) {
