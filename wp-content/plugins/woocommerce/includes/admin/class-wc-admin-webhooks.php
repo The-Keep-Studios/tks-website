@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Admin Webhooks Class.
+ * WooCommerce Admin Webhooks Class
  *
  * @author   WooThemes
  * @category Admin
@@ -13,19 +13,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Admin_Webhooks
+ * WC_Admin_Webhooks.
  */
 class WC_Admin_Webhooks {
 
 	/**
-	 * Initialize the webhooks admin actions
+	 * Initialize the webhooks admin actions.
 	 */
 	public function __construct() {
 		add_action( 'admin_init', array( $this, 'actions' ) );
 	}
 
 	/**
-	 * Check if is webhook settings page
+	 * Check if is webhook settings page.
 	 *
 	 * @return bool
 	 */
@@ -39,19 +39,22 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
-	 * Updated the Webhook name
+	 * Updated the Webhook name.
 	 *
 	 * @param int $webhook_id
 	 */
 	private function update_name( $webhook_id ) {
 		global $wpdb;
 
+		// @codingStandardsIgnoreStart
+		/* translators: %s: date` */
 		$name = ! empty( $_POST['webhook_name'] ) ? $_POST['webhook_name'] : sprintf( __( 'Webhook created on %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) );
+		// @codingStandardsIgnoreEnd
 		$wpdb->update( $wpdb->posts, array( 'post_title' => $name ), array( 'ID' => $webhook_id ) );
 	}
 
 	/**
-	 * Updated the Webhook status
+	 * Updated the Webhook status.
 	 *
 	 * @param WC_Webhook $webhook
 	 */
@@ -62,7 +65,7 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
-	 * Updated the Webhook delivery URL
+	 * Updated the Webhook delivery URL.
 	 *
 	 * @param WC_Webhook $webhook
 	 */
@@ -75,18 +78,18 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
-	 * Updated the Webhook secret
+	 * Updated the Webhook secret.
 	 *
 	 * @param WC_Webhook $webhook
 	 */
 	private function update_secret( $webhook ) {
-		$secret = ! empty( $_POST['webhook_secret'] ) ? $_POST['webhook_secret'] : get_user_meta( get_current_user_id(), 'woocommerce_api_consumer_secret', true );
+		$secret = ! empty( $_POST['webhook_secret'] ) ? $_POST['webhook_secret'] : wp_generate_password( 50, true, true );
 
 		$webhook->set_secret( $secret );
 	}
 
 	/**
-	 * Updated the Webhook topic
+	 * Updated the Webhook topic.
 	 *
 	 * @param WC_Webhook $webhook
 	 */
@@ -121,7 +124,18 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
-	 * Save method
+	 * Update webhook api version.
+	 *
+	 * @param WC_Webhook $webhook Webhook instance.
+	 */
+	private function update_api_version( $webhook ) {
+		$version = ! empty( $_POST['webhook_api_version'] ) ? wc_clean( $_POST['webhook_api_version'] ) : 'wp_api_v2';
+
+		$webhook->set_api_version( $version );
+	}
+
+	/**
+	 * Save method.
 	 */
 	private function save() {
 		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-settings' ) ) {
@@ -151,23 +165,37 @@ class WC_Admin_Webhooks {
 		// Topic
 		$this->update_topic( $webhook );
 
-		// Ping the webhook at the first time that is activated
-		$peding_delivery = get_post_meta( $webhook->id, '_webhook_pending_delivery', true );
-		if ( isset( $_POST['webhook_status'] ) && 'active' === $_POST['webhook_status'] && $peding_delivery ) {
-			$webhook->deliver_ping();
-		}
+		// API version.
+		$this->update_api_version( $webhook );
 
+		// Update date.
+		wp_update_post( array( 'ID' => $webhook->id, 'post_modified' => current_time( 'mysql' ) ) );
+
+		// Run actions
 		do_action( 'woocommerce_webhook_options_save', $webhook->id );
 
 		delete_transient( 'woocommerce_webhook_ids' );
 
+		// Ping the webhook at the first time that is activated
+		$pending_delivery = get_post_meta( $webhook->id, '_webhook_pending_delivery', true );
+
+		if ( isset( $_POST['webhook_status'] ) && 'active' === $_POST['webhook_status'] && $pending_delivery ) {
+			$result = $webhook->deliver_ping();
+
+			if ( is_wp_error( $result ) ) {
+				// Redirect to webhook edit page to avoid settings save actions
+				wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->id . '&error=' . urlencode( $result->get_error_message() ) ) );
+				exit();
+			}
+		}
+
 		// Redirect to webhook edit page to avoid settings save actions
-		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->id . '&updated=1' ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->id . '&updated=1' ) );
 		exit();
 	}
 
 	/**
-	 * Create Webhook
+	 * Create Webhook.
 	 */
 	private function create() {
 		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'create-webhook' ) ) {
@@ -184,8 +212,11 @@ class WC_Admin_Webhooks {
 			'ping_status'   => 'closed',
 			'post_author'   => get_current_user_id(),
 			'post_password' => strlen( ( $password = uniqid( 'webhook_' ) ) ) > 20 ? substr( $password, 0, 20 ) : $password,
+			// @codingStandardsIgnoreStart
+			/* translators: %s: date */
 			'post_title'    => sprintf( __( 'Webhook created on %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) ),
-			'comment_status' => 'open'
+			// @codingStandardsIgnoreEnd
+			'comment_status' => 'open',
 		) );
 
 		if ( is_wp_error( $webhook_id ) ) {
@@ -193,6 +224,8 @@ class WC_Admin_Webhooks {
 		}
 
 		update_post_meta( $webhook_id, '_webhook_pending_delivery', true );
+		$webhook = new WC_Webhook( $webhook_id );
+		$webhook->set_api_version( 'wp_api_v2' );
 
 		delete_transient( 'woocommerce_webhook_ids' );
 
@@ -202,7 +235,7 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
-	 * Bulk trash/delete
+	 * Bulk trash/delete.
 	 *
 	 * @param array $webhooks
 	 * @param bool  $delete
@@ -228,7 +261,7 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
-	 * Bulk untrash
+	 * Bulk untrash.
 	 *
 	 * @param array $webhooks
 	 */
@@ -247,7 +280,7 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
-	 * Bulk actions
+	 * Bulk actions.
 	 */
 	private function bulk_actions() {
 		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-settings' ) ) {
@@ -276,7 +309,7 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
-	 * Empty Trash
+	 * Empty Trash.
 	 */
 	private function empty_trash() {
 		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'empty_trash' ) ) {
@@ -292,7 +325,7 @@ class WC_Admin_Webhooks {
 			'ignore_sticky_posts' => true,
 			'nopaging'            => true,
 			'post_status'         => 'trash',
-			'fields'              => 'ids'
+			'fields'              => 'ids',
 		) );
 
 		foreach ( $webhooks as $webhook_id ) {
@@ -307,7 +340,7 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
-	 * Webhooks admin actions
+	 * Webhooks admin actions.
 	 */
 	public function actions() {
 		if ( $this->is_webhook_settings_page() ) {
@@ -334,7 +367,7 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
-	 * Page output
+	 * Page output.
 	 */
 	public static function page_output() {
 		// Hide the save button
@@ -360,19 +393,22 @@ class WC_Admin_Webhooks {
 		if ( isset( $_GET['trashed'] ) ) {
 			$trashed = absint( $_GET['trashed'] );
 
-			WC_Admin_Settings::add_message( sprintf( _n( '1 webhook moved to the Trash.', '%d webhooks moved to the Trash.', $trashed, 'woocommerce' ), $trashed ) );
+			/* translators: %d: count */
+			WC_Admin_Settings::add_message( sprintf( _n( '%d webhook moved to the Trash.', '%d webhooks moved to the Trash.', $trashed, 'woocommerce' ), $trashed ) );
 		}
 
 		if ( isset( $_GET['untrashed'] ) ) {
 			$untrashed = absint( $_GET['untrashed'] );
 
-			WC_Admin_Settings::add_message( sprintf( _n( '1 webhook restored from the Trash.', '%d webhooks restored from the Trash.', $untrashed, 'woocommerce' ), $untrashed ) );
+			/* translators: %d: count */
+			WC_Admin_Settings::add_message( sprintf( _n( '%d webhook restored from the Trash.', '%d webhooks restored from the Trash.', $untrashed, 'woocommerce' ), $untrashed ) );
 		}
 
 		if ( isset( $_GET['deleted'] ) ) {
 			$deleted = absint( $_GET['deleted'] );
 
-			WC_Admin_Settings::add_message( sprintf( _n( '1 webhook permanently deleted.', '%d webhooks permanently deleted.', $deleted, 'woocommerce' ), $deleted ) );
+			/* translators: %d: count */
+			WC_Admin_Settings::add_message( sprintf( _n( '%d webhook permanently deleted.', '%d webhooks permanently deleted.', $deleted, 'woocommerce' ), $deleted ) );
 		}
 
 		if ( isset( $_GET['updated'] ) ) {
@@ -382,13 +418,17 @@ class WC_Admin_Webhooks {
 		if ( isset( $_GET['created'] ) ) {
 			WC_Admin_Settings::add_message( __( 'Webhook created successfully.', 'woocommerce' ) );
 		}
+
+		if ( isset( $_GET['error'] ) ) {
+			WC_Admin_Settings::add_error( wc_clean( $_GET['error'] ) );
+		}
 	}
 
 	/**
-	 * Table list output
+	 * Table list output.
 	 */
 	private static function table_list_output() {
-		echo '<h3>' . __( 'Webhooks', 'woocommerce' ) . ' <a href="' . esc_url( wp_nonce_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&create-webhook=1' ), 'create-webhook' ) ) . '" class="add-new-h2">' . __( 'Add Webhook', 'woocommerce' ) . '</a></h3>';
+		echo '<h2>' . __( 'Webhooks', 'woocommerce' ) . ' <a href="' . esc_url( wp_nonce_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&create-webhook=1' ), 'create-webhook' ) ) . '" class="add-new-h2">' . __( 'Add webhook', 'woocommerce' ) . '</a></h2>';
 
 		$webhooks_table_list = new WC_Admin_Webhooks_Table_List();
 		$webhooks_table_list->prepare_items();
@@ -398,12 +438,12 @@ class WC_Admin_Webhooks {
 		echo '<input type="hidden" name="section" value="webhooks" />';
 
 		$webhooks_table_list->views();
-		$webhooks_table_list->search_box( __( 'Search Webhooks', 'woocommerce' ), 'webhook' );
+		$webhooks_table_list->search_box( __( 'Search webhooks', 'woocommerce' ), 'webhook' );
 		$webhooks_table_list->display();
 	}
 
 	/**
-	 * Logs output
+	 * Logs output.
 	 *
 	 * @param WC_Webhook $webhook
 	 */
@@ -413,7 +453,7 @@ class WC_Admin_Webhooks {
 			'post_id' => $webhook->id,
 			'status'  => 'approve',
 			'type'    => 'webhook_delivery',
-			'number'  => 10
+			'number'  => 10,
 		);
 
 		if ( 1 < $current ) {
@@ -427,14 +467,14 @@ class WC_Admin_Webhooks {
 		add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_webhook_comments' ), 10, 1 );
 
 		if ( $logs ) {
-			include_once( 'settings/views/html-webhook-logs.php' );
+			include_once( dirname( __FILE__ ) . '/settings/views/html-webhook-logs.php' );
 		} else {
 			echo '<p>' . __( 'This Webhook has no log yet.', 'woocommerce' ) . '</p>';
 		}
 	}
 
 	/**
-	 * Get the webhook topic data
+	 * Get the webhook topic data.
 	 *
 	 * @return array
 	 */
@@ -448,7 +488,7 @@ class WC_Admin_Webhooks {
 
 			if ( 'action' === $resource ) {
 				$topic = 'action';
-			} else if ( ! in_array( $resource, array( 'coupon', 'customer', 'order', 'product' ) ) ) {
+			} elseif ( ! in_array( $resource, array( 'coupon', 'customer', 'order', 'product' ) ) ) {
 				$topic = 'custom';
 			}
 		}
@@ -456,7 +496,7 @@ class WC_Admin_Webhooks {
 		return array(
 			'topic'    => $topic,
 			'event'    => $event,
-			'resource' => $resource
+			'resource' => $resource,
 		);
 	}
 
@@ -474,7 +514,13 @@ class WC_Admin_Webhooks {
 		$html = '<div class="webhook-logs-navigation">';
 
 			$html .= '<p class="info" style="float: left;"><strong>';
-			$html .= sprintf( '%s &ndash; Page %d of %d', _n( '1 item', sprintf( '%d items', $total ), $total, 'woocommerce' ), $current, $pages );
+			/* translators: 1: items count (i.e. 8 items) 2: current page 3: total pages */
+			$html .= sprintf(
+				__( '%1$s &ndash; Page %2$d of %3$d', 'woocommerce' ),
+				sprintf( _n( '%d item', '%d items', $total, 'woocommerce' ), $total ),
+				$current,
+				$pages
+			);
 			$html .= '</strong></p>';
 
 			if ( 1 < $pages ) {

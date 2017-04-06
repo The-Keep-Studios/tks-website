@@ -15,6 +15,12 @@ class core_google_apps_login {
 	
 	// May be overridden in basic or premium
 	public function ga_activation_hook($network_wide) {
+		global $gal_core_already_exists;
+		if ($gal_core_already_exists) {
+			deactivate_plugins( $this->my_plugin_basename() );
+			echo( 'Please Deactivate the free version of Google Apps Login before you activate the new Premium/Enterprise version.' );
+			exit;
+		}
 	}
 	
 	public function ga_plugins_loaded() {
@@ -37,7 +43,7 @@ class core_google_apps_login {
 	private $doneIncludePath = false;
 	private function setIncludePath() {
 		if (!$this->doneIncludePath) {
-			set_include_path(get_include_path() . PATH_SEPARATOR . plugin_dir_path(__FILE__));
+			set_include_path(plugin_dir_path(__FILE__) . PATH_SEPARATOR . get_include_path());
 			$this->doneIncludePath = true;
 		}
 	}
@@ -61,6 +67,11 @@ class core_google_apps_login {
 		$client->setClientId($options['ga_clientid']);
 		$client->setClientSecret($options['ga_clientsecret']);
 		$client->setRedirectUri($this->get_login_url());
+
+		$hd = $this->get_hd();
+		if ($hd) {
+			$client->setHostedDomain($hd);
+		}
 		
 		$scopes = array_unique(apply_filters('gal_gather_scopes', $this->get_default_scopes()));
 		$client->setScopes($scopes);
@@ -75,6 +86,10 @@ class core_google_apps_login {
 		}
 				
 		return Array($client, $oauthservice);
+	}
+
+	protected function get_hd() {
+		return '';
 	}
 	
 	protected function get_default_scopes() {
@@ -242,7 +257,8 @@ class core_google_apps_login {
 	}
 	
 	protected function get_login_button_text() {
-		return __( 'Login with Google' , 'google-apps-login');
+		$login_button_text = __('Login with Google', 'google-apps-login');
+		return apply_filters('gal_login_button_text', $login_button_text);
 	}
 	
 	protected function should_hidewplogin($options) {
@@ -272,8 +288,12 @@ class core_google_apps_login {
 										.'<a href="http://wp-glogin.com/installing-google-apps-login/#main-settings"'
 										.' target="_blank">instructions here</a>' , 'google-apps-login');
 				break;
+				case 'ga_user_must_glogin':
+					$error_message = sprintf(__( 'The user must use <i>%s</i> to access the site' , 'google-apps-login'),
+					                        htmlentities($this->get_login_button_text()));
+				break;
 				default:
-					$error_message = htmlentities2($_REQUEST['error']);
+					$error_message = __( 'Unrecognized error message' , 'google-apps-login');
 				break;
 			}
 			$user = new WP_Error('ga_login_error', $error_message);
@@ -366,7 +386,6 @@ class core_google_apps_login {
 		}
 		
 		if (is_wp_error($user)) {
-			$this->checkRegularWPError($user, $username, $password); // May exit			
 			$this->displayAndReturnError($user);
 		}
 		
@@ -380,10 +399,6 @@ class core_google_apps_login {
 
 	protected function checkRegularWPLogin($user, $username, $password, $options) {
 		return $user;
-	}
-	
-	// Has content in Premium
-	protected function checkRegularWPError($user, $username, $password) {
 	}
 	
 	// Has content in Enterprise
@@ -414,6 +429,12 @@ class core_google_apps_login {
 		if ($user && !is_wp_error($user)) {
 			$final_redirect = $this->getFinalRedirect();
 			if ($final_redirect !== '') {
+				$option = $this->get_option_galogin();
+				// Whitelist the subdomain if all auth is going through the top level domain's wp-login.php
+				if (is_multisite() && !$option['ga_ms_usesubsitecallback']) {
+					$this->add_allowed_redirect_host($final_redirect);
+					add_filter('allowed_redirect_hosts', array($this,'gal_allowed_redirect_hosts'), 10);
+				}
 				return $final_redirect;
 			}
 		}
@@ -421,8 +442,15 @@ class core_google_apps_login {
 	}
 	
 	public function ga_init() {
-		if ($GLOBALS['pagenow'] == 'wp-login.php') {
-			setcookie(self::$gal_cookie_name, $this->get_cookie_value(), time()+36000, '/', defined(COOKIE_DOMAIN) ? COOKIE_DOMAIN : '' );
+		if (isset($_GET['code']) && isset($_GET['state']) && $_SERVER['REQUEST_METHOD']=='GET') {
+			$options = $this->get_option_galogin();
+			if ($options['ga_rememberme']) {
+				$_POST['rememberme'] = true;
+			}
+		}
+		if (!isset($_COOKIE[self::$gal_cookie_name]) && apply_filters('gal_set_login_cookie', true)) {
+			$secure = ( 'https' === parse_url( $this->get_login_url(), PHP_URL_SCHEME ) );
+			setcookie(self::$gal_cookie_name, $this->get_cookie_value(), 0, '/', defined('COOKIE_DOMAIN') ? COOKIE_DOMAIN : '', $secure );
 		}
 	}
 	
@@ -439,6 +467,45 @@ class core_google_apps_login {
 		}
 
 		return apply_filters( 'gal_login_url', $login_url );
+	}
+
+	protected $allowed_redirect_hosts = array();
+	// In multisite, add subdomains to allowed_redirect_hosts so redirect_to can work for them
+	public function gal_allowed_redirect_hosts($hosts) {
+		return array_merge($hosts, $this->allowed_redirect_hosts);
+	}
+
+	protected function add_allowed_redirect_host($location) {
+		if (!is_multisite()) {
+			return;
+		}
+
+		if (!defined('SUBDOMAIN_INSTALL') || !SUBDOMAIN_INSTALL) {
+			return;
+		}
+
+		$location = trim( strtolower($location) );
+		// browsers will assume 'http' is your protocol, and will obey a redirect to a URL starting with '//'
+		if ( substr($location, 0, 2) == '//' )
+			$location = 'http:' . $location;
+
+		// In php 5 parse_url may fail if the URL query part contains http://, bug #38143
+		$test = ( $cut = strpos($location, '?') ) ? substr( $location, 0, $cut ) : $location;
+
+		// @-operator is used to prevent possible warnings in PHP < 5.3.3.
+		$lp = @parse_url($test);
+
+		// Give up if malformed URL
+		if ( false === $lp )
+			return;
+
+		$sites = get_sites(
+			array('domain' => $lp['host'])
+		);
+
+		if (count($sites) > 0) {
+			$this->allowed_redirect_hosts[] = $lp['host'];
+		}
 	}
 	
 	// Build our own nonce functions as wp_create_nonce is user dependent,
@@ -525,25 +592,21 @@ class core_google_apps_login {
 			$this->set_other_admin_notices();
 		}
 		
-		add_action('show_user_profile', Array($this, 'ga_personal_options'));
+		add_action('user_profile_picture_description', Array($this, 'gal_user_profile_picture_description'));
 	}
 	
-	public function ga_personal_options($wp_user) {
-		if (is_object($wp_user)) {
-		// Display avatar in profile
-		$purchase_url = 'http://wp-glogin.com/avatars/?utm_source=Profile%20Page&utm_medium=freemium&utm_campaign=Avatars';
-		$source_text = 'Install <a href="'.$purchase_url.'">Google Profile Avatars</a> to use your Google account\'s profile photo here automatically.';
-		?>
-		<table class="form-table">
-			<tbody><tr>
-				<th>Profile Photo</th>
-				<td><?php echo get_avatar($wp_user->ID, '48'); ?></td>
-				<td><?php echo apply_filters('gal_avatar_source_desc', $source_text, $wp_user); ?></td>
-			</tr>
-			</tbody>
-		</table>
-		<?php
+	public function gal_user_profile_picture_description($description) {
+		if ($description != '') {
+
+			// Display avatar in profile
+			$purchase_url = 'http://wp-glogin.com/avatars/?utm_source=Profile%20Page&utm_medium=freemium&utm_campaign=Avatars';
+			$source_text = '<b>Install <a href="'.$purchase_url.'">Google Profile Avatars</a> to use your Google account\'s profile photo here automatically.</b>';
+
+			$wp_user = wp_get_current_user();
+			$description = apply_filters('gal_avatar_source_desc', $description.' <br /> '.$source_text, $wp_user);
 		}
+
+		return $description;
 	}
 	
 	// Has content in Basic
@@ -840,7 +903,15 @@ class core_google_apps_login {
 		echo '<label for="input_ga_auto_login" class="checkbox plain">';
 		_e( 'Automatically redirect to Google from login page' , 'google-apps-login' );
 		echo '</label>';
-		
+
+		echo '<br class="clear" />';
+
+		echo "<input id='input_ga_rememberme' name='".$this->get_options_name()."[ga_rememberme]' type='checkbox' ".($options['ga_rememberme'] ? 'checked' : '')." class='checkbox' />";
+
+		echo '<label for="input_ga_rememberme" class="checkbox plain">';
+		_e( 'Remember Me - do not log users out at end of browser session' , 'google-apps-login' );
+		echo '</label>';
+
 		echo '<br class="clear" />';
 		
 		echo "<input id='input_ga_poweredby' name='".$this->get_options_name()."[ga_poweredby]' type='checkbox' ".($options['ga_poweredby'] ? 'checked' : '')." class='checkbox' />";
@@ -899,10 +970,11 @@ class core_google_apps_login {
 		$newinput['ga_force_permissions'] = isset($input['ga_force_permissions']) ? (boolean)$input['ga_force_permissions'] : false;
 		$newinput['ga_auto_login'] = isset($input['ga_auto_login']) ? (boolean)$input['ga_auto_login'] : false;
 		$newinput['ga_poweredby'] = isset($input['ga_poweredby']) ? (boolean)$input['ga_poweredby'] : false;
+		$newinput['ga_rememberme'] = isset($input['ga_rememberme']) ? (boolean)$input['ga_rememberme'] : false;
 		
 		// Service account settings
 		$newinput['ga_domainadmin'] = isset($input['ga_domainadmin']) ? trim($input['ga_domainadmin']) : '';
-		if (!preg_match('/^([A-Za-z0-9._%+-]+@([0-9a-z-]+\.)*[0-9a-z-]+\.[a-z]{2,7})?$/', $newinput['ga_domainadmin'])) {
+		if (!preg_match('/^([A-Za-z0-9._%+-]+@([0-9a-z-]+\.)*[0-9a-z-]+\.[a-z]{2,63})?$/', $newinput['ga_domainadmin'])) {
 			add_settings_error(
 			'ga_domainadmin',
 			'invalid_email',
@@ -980,6 +1052,7 @@ class core_google_apps_login {
 						'ga_force_permissions' => false,
 						'ga_auto_login' => false,
 						'ga_poweredby' => false,
+						'ga_rememberme' => false,
 						'ga_sakey' => '',
 						'ga_domainadmin' => '');
 	}
@@ -999,7 +1072,7 @@ class core_google_apps_login {
 			}
 		}
 		
-		$this->ga_options = $option;
+		$this->ga_options = apply_filters( 'gal_options', $option );
 		return $this->ga_options;
 	}
 	
@@ -1043,7 +1116,7 @@ class core_google_apps_login {
 			}
 		}
 		
-		$this->ga_sa_options = $ga_sa_options;
+		$this->ga_sa_options = apply_filters('gal_sa_options', $ga_sa_options );
 		return $this->ga_sa_options;
 	}
 	

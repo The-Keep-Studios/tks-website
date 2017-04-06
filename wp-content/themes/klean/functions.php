@@ -39,6 +39,8 @@ function klean_setup() {
 	 * @link http://codex.wordpress.org/Function_Reference/add_theme_support#Post_Thumbnails
 	 */
 	add_theme_support( 'post-thumbnails' );
+	
+	add_theme_support('custom-logo');
 
 	// This theme uses wp_nav_menu() in one location.
 	register_nav_menus( array(
@@ -205,7 +207,7 @@ add_action( 'widgets_init', 'klean_widgets_init' );
 function klean_scripts() {
 	wp_enqueue_style( 'klean-style', get_stylesheet_uri() );
 
-	wp_enqueue_style('klean-bootstrap-style',get_template_directory_uri()."/assets/bootstrap/bootstrap.min.css", array('klean-style'));
+	wp_enqueue_style('klean-bootstrap-style',get_template_directory_uri()."/assets/bootstrap/css/bootstrap.css", array('klean-style'));
 	
 	wp_enqueue_style('klean-main-skin',get_template_directory_uri()."/assets/skins/main.css", array('klean-bootstrap-style'));
 	
@@ -235,10 +237,12 @@ function klean_initialize_header() {
 	echo "#social-icons span i.fa-circle{color: " . esc_attr( get_theme_mod( 'klean-social-color','black' ) ) . ";}
 		  .fa-inverse {color: " . esc_attr( get_theme_mod( 'klean-social-icon-color','white' ) ) . ";}";
 		  
-	if ( get_theme_mod( 'klean-post-sidebar' ) == true ) {
+	if ( get_theme_mod( 'klean-post-sidebar' ) == false ) {
 		echo "#secondary:not(.left-sidebar):not(.right-sidebar) {display: none;}
 			  #primary {width: 100%;}";
 	}
+	
+	echo ".site-description {color: " . get_theme_mod('klean-desc-color', '#555555') . "; }";
 	
 	echo "</style>";
 	 

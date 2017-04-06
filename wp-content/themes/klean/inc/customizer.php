@@ -14,41 +14,58 @@ function klean_customize_register( $wp_customize ) {
 	$wp_customize->get_setting( 'blogname' )->transport         = 'postMessage';
 	$wp_customize->get_setting( 'blogdescription' )->transport  = 'postMessage';
 	$wp_customize->get_setting( 'header_textcolor' )->transport = 'postMessage';
+	$wp_customize->get_control( 'header_textcolor' )->label		= __('Site Title Color', 'klean');
+	$wp_customize->get_control( 'header_textcolor' )->priority	= 11;
 	$wp_customize->remove_section( 'nav' );
 	
+	class klean_custom_review extends WP_Customize_Control {
+	    public $type = 'textarea';
+	 
+	    public function render_content() {
+	        ?>
+	            <label>
+	                <span class="customize-control-title"><?php echo esc_html( $this->label ); ?></span>
+	                <textarea rows="8" style="width:100%;background: black; color: white;" <?php $this->link(); ?>><?php echo esc_textarea( $this->value() ); ?></textarea>
+	            </label>
+	        <?php
+	    }
+	}
+	
 	$wp_customize-> add_setting(
-	'logo',
-	array(
-		'default'			=> '',
-		'sanitize_callback'	=> 'esc_url_raw',
-		)
-	);
-    
-    $wp_customize-> add_control(
-	new WP_Customize_Image_Control(
-        $wp_customize,
-        'logo',
-        array(
-            'label' => __('OR Logo Upload', 'klean'),
-            'section' => 'title_tagline',
-            'settings' => 'logo'
-            )
-        )
+    'klean-desc-color',
+    array(
+	    'default'			=> '#555555',
+    	'sanitize_callback'	=> 'sanitize_hex_color',
+    	'transport'			=> 'postMessage',
+    	)
     );
+    
+    $wp_customize->add_control(
+	    new WP_Customize_Color_Control(
+	        $wp_customize,
+	        'klean-desc-color',
+	        array(
+	            'label' => __('Site Description Color','klean'),
+	            'section' => 'colors',
+	            'settings' => 'klean-desc-color',
+                'priority'  => 12
+	        )
+	    )
+	);
 	
 	$wp_customize-> add_section(
     'klean_layout',
     array(
     	'title'			=> __('Layout Settings','klean'),
     	'description'	=> __('Manage the Layout Settings of your site.','klean'),
-    	'priority'		=> 1,
+    	'priority'		=> 2,
     	)
     );
     
     $wp_customize-> add_setting(
     'klean-post-sidebar',
     array(
-    	'default'			=> false,
+    	'default'			=> true,
     	'sanitize_callback'	=> 'klean_sanitize_checkbox',
     	)
     );
@@ -57,10 +74,28 @@ function klean_customize_register( $wp_customize ) {
     'klean-post-sidebar',
     array(
     	'type'		=> 'checkbox',
-    	'label'		=> __('Hide Sidebar on Posts/Pages','klean'),
+    	'label'		=> __('Show Sidebar Everywhere','klean'),
     	'section'	=> 'klean_layout',
     	'priority'	=> 1,
     	)
+    );
+    
+    $wp_customize-> add_setting(
+	    'klean-featured-image',
+	    array(
+		    'default'	=> true,
+		    'sanitize_callback'	=> 'klean_sanitize_checkbox'
+	    )
+    );
+    
+    $wp_customize-> add_control(
+	    'klean-featured-image',
+	    array(
+		    'type'	=> 'checkbox',
+		    'label'	=> __('Show Featured Image in the Posts', 'klean'),
+		    'section'	=> 'klean_layout',
+		    'priority'	=> 5
+	    )
     );
     
 	$wp_customize-> add_section(
@@ -258,7 +293,7 @@ function klean_customize_register( $wp_customize ) {
 
     
     $wp_customize-> add_setting(
-    'vimeo-square',
+    'vimeo',
     array(
     	'default'	=> '',
     	'sanitize_callback' => 'esc_url_raw',
@@ -266,7 +301,7 @@ function klean_customize_register( $wp_customize ) {
     );
     
     $wp_customize-> add_control(
-    'vimeo-square',
+    'vimeo',
     array(
     	'label'		=> __('Vimeo URL','klean'),
     	'section'	=> 'klean_social',
@@ -430,30 +465,10 @@ function klean_customize_register( $wp_customize ) {
     'custom_set',
     array(
     	'title'			=> __('Custom Settings','klean'),
-    	'description'	=> __('Add some custom CSS code to edit your theme.','klean'),
+    	'description'	=> __('Custom Settings for the Theme','klean'),
     	'priority'		=> 30,
     	)
     );
-    
-	$wp_customize->add_setting(
-	'css',
-	array(
-		'default'		=> '',
-		'sanitize_callback'	=> 'klean_sanitize_text'
-		)
-	);
- 
-	$wp_customize->add_control(
-	    new Custom_CSS_Control(
-	        $wp_customize,
-	        'css',
-	        array(
-	            'label' => __('Custom CSS','klean'),
-	            'section' => 'custom_set',
-	            'settings' => 'css'
-	        )
-	    )
-	);
 	
 	$wp_customize->add_setting(
 	'klean-footer-text',
@@ -475,13 +490,76 @@ function klean_customize_register( $wp_customize ) {
 	    )
 	);
 	
+	class Klean_Review_Control extends WP_Customize_Control {   
+		
+		public $type = 'klean-options';
+		 
+	    public function render_content() {
+	        ?>
+			<li><a class="button klean_rev" href="https://www.wordpress.org/themes/klean" target="_blank" title="<?php esc_attr_e('Rate the Theme', 'klean'); ?>"><?php printf('Rate Klean Theme', 'klean'); ?></a></li>
+			<br>
+			<li><h2 class="fb-like-title"><?php _e('Like Divjot.Co on Facebook', 'klean'); ?></h2><div class="fb-like" data-href="https://www.facebook.com/divjotco" data-layout="standard" data-action="like" data-size="small" data-show-faces="true" data-share="false"></div></li>
+			<br>
+			<li><h2 class="twitter-title"><?php _e('Follow me on Twitter', 'klean'); ?></h2><a class="twitter-follow-button" href="https://twitter.com/divjot911" data-size="large">Follow me on Twitter</a></li>
+			<br>
+			<li><h2 class="pro-title"><?php _e('Enjoying the Theme? Upgrade and Experience the Superpowers of the Theme.', 'klean'); ?></h2><a class="button klean_pro" href="http://www.divjot.co/product/super-klean" target="_blank" title="<?php esc_attr_e('Super Klean', 'klean'); ?>"><?php printf('Check out Super Klean', 'klean'); ?></a></li>
+			
+			
+				<div id="fb-root"></div>
+				<div id="fb-root"></div>
+					<script>(function(d, s, id) {
+					  var js, fjs = d.getElementsByTagName(s)[0];
+					  if (d.getElementById(id)) return;
+					  js = d.createElement(s); js.id = id;
+					  js.src = "//connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v2.8";
+					  fjs.parentNode.insertBefore(js, fjs);
+					}(document, 'script', 'facebook-jssdk'));</script>
+				
+				<script>window.twttr = (function(d, s, id) {
+				  var js, fjs = d.getElementsByTagName(s)[0],
+				    t = window.twttr || {};
+				  if (d.getElementById(id)) return t;
+				  js = d.createElement(s);
+				  js.id = id;
+				  js.src = "https://platform.twitter.com/widgets.js";
+				  fjs.parentNode.insertBefore(js, fjs);
+				
+				  t._e = [];
+				  t.ready = function(f) {
+				    t._e.push(f);
+				  };
+				
+				  return t;
+				}(document, "script", "twitter-wjs"));</script>
+			
+					
+	        <?php
+	    }
+	}
+	
 	$wp_customize-> add_section(
     'klean_pro',
     array(
-    	'title'			=> __('Upgrade to Pro !!!','klean'),
-    	'description'	=> __('<i>If you liked the theme, you can upgrade to Super Klean and unlock the full features of the theme. <br><br>Super Klean offers a multitude of features such as Featured Area, Slider and Video support for Header, Multiple Layouts and much more along with dedicated support for the theme. <br><br><b>You can check out the Premium Version <a href="http://www.divjot.co/product/super-klean">here</a>.</b></i>','klean'),
-    	'priority'		=> 999,
+    	'title'			=> __('Theme Links','klean'),
+    	'priority'		=> 1,
     	)
+    );
+    
+    $wp_customize-> add_setting(
+	    'klean_review',
+		array(
+			'sanitize_callback'	=> 'esc_url_raw'
+		)
+    );
+    
+    $wp_customize->add_control(
+	    new Klean_Review_Control(
+		    $wp_customize,
+                'klean_review', array(
+                'section' => 'klean_pro',
+                'type' => 'klean-options',
+            )
+	    )
     );
     
     class MyCustom_Customize_Control extends WP_Customize_Control {    
@@ -547,6 +625,36 @@ wp.customize( 'pro_hide', function( value ) {
 	 function klean_sanitize_text( $input ) {
     return wp_kses_post( force_balance_tags( $input ) );
 }
+
+	if ( $wp_customize->is_preview() ) {
+	    add_action( 'wp_footer', 'klean_customize_preview', 21);
+	}
+	
+	function klean_customize_preview() {
+    ?>
+    <script type="text/javascript">
+        ( function( jQuery ) {
+            wp.customize('klean-desc-color',function( value ) {
+                value.bind(function(to) {
+                    jQuery('.site-description').css('color', to );
+                });
+            });
+             wp.customize('header_textcolor',function( value ) {
+                value.bind(function(to) {
+                    jQuery('.site-title a').css('color', to );
+                });
+            });
+            wp.customize('display_header_text', function( value ) {
+	            value.bind( function(to) {
+		            if ( to == false ) {
+			            jQuery( '.site-title'). hide();
+		            }
+	            });
+            });
+        } )( jQuery )
+    </script>
+    <?php
+}  // End function klean_customize_preview()
 	
 	}
 add_action( 'customize_register', 'klean_customize_register' );
@@ -558,3 +666,4 @@ function klean_customize_preview_js() {
 	wp_enqueue_script( 'klean_customizer', get_template_directory_uri() . '/js/customizer.js', array( 'customize-preview' ), '20130508', true );
 }
 add_action( 'customize_preview_init', 'klean_customize_preview_js' );
+

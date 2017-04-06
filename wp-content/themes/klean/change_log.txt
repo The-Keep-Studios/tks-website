@@ -48,3 +48,38 @@
 			  3. Minor Bug Fixes
 
 		v1.13	- 1. Updated Font Awesome
+
+		v1.15	- 1. Updated Bootstrap
+			  2. Minor Layout Bug fixes
+
+		v1.16	- 1. Layout Changes
+			  2. Updated Screenshot
+			  3. Minor Bug Fixes
+
+		v1.17	- 1. Update Vimeo Social Icon
+			  2. Post Format specific changes
+
+		v1.18	- 1. Some Layout Changes
+			  2. Additional feature to disable featured image on Posts
+			  3. Fixed some bugs in the theme
+			  
+		v1.19	- 1. Updated Font Awesome
+				  2. Minor Bug Fixes
+
+		v1.20 	- 1. Logo Compatibility with the latest versions of WordPress
+			  2. Minor Bug fixes
+
+		v1.21	- Bug Fixes
+
+		v1.22	- 1. Updated Bootstrap
+			  2. Increased legibility for Mobile Layout
+
+		v1.23 	- Updated Font Awesome
+
+		v1.23.1	- Changed Layout of Archive Pages
+				
+		v1.23.2	- Updated the code
+			  Improved the ThemeCheck.org rating
+			  Changed the extension of screenshot
+
+		v1.24	- Bug Fixes and Layout Improvements
