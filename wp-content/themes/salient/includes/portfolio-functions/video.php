@@ -8,6 +8,7 @@ require_once( $path_to_wp . '/wp-load.php' );
 
 
 $postid = stripslashes(htmlspecialchars_decode(filter_input(INPUT_GET, 'post-id', FILTER_SANITIZE_STRING)));
+$postid = sanitize_text_field($postid);
 
 $video_height = get_post_meta($postid, '_nectar_video_height', true);
 $video = get_post_meta($postid, '_nectar_video_embed', true);
@@ -15,6 +16,9 @@ $video = get_post_meta($postid, '_nectar_video_embed', true);
 $video_m4v = get_post_meta($postid, '_nectar_video_m4v', true); 
 $video_ogv = get_post_meta($postid, '_nectar_video_ogv', true); 
 $video_poster = get_post_meta($postid, '_nectar_video_poster', true); 
+
+global $options;
+$theme_lightbox = (!empty($options['lightbox_script'])) ? $options['lightbox_script'] : 'pretty_photo';
 
 if(empty($video_height)) $video_height = 480;
  
@@ -77,7 +81,9 @@ wp_dequeue_script( 'respond' );
 	</style>
 <?php }  else { ?>
 	<style>
-		body {background-color: #000; overflow-y:hidden; height: <?php echo $video_height; ?>px!Important;}
+		<?php if($theme_lightbox != 'magnific') { ?>
+			body {background-color: #000; overflow-y:hidden; height: <?php echo $video_height; ?>px!Important;}
+		<?php } ?>
 		#wpadminbar { display: none;}
 		html { margin-top: 0px!important; }
 		.mejs-mediaelement #me_flash_0_container {
@@ -97,7 +103,7 @@ wp_dequeue_script( 'respond' );
 <body class="pp-video-function">
 <?php
 if ( floatval(get_bloginfo('version')) < "3.6" ) {
-	nectar_video($postid); 	
+	//nectar_video($postid); 	
 } else {
 	
 	//self hosted

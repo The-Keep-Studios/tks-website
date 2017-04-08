@@ -200,10 +200,12 @@ jQuery(document).ready(function($){
     		$('#enable_social_in_header').parents('tr').nextAll('tr').hide();
     	}
     }
-    toggleSocialOptions();
-    
+
+    //toggleSocialOptions();
+
+ 
     $('select#header_layout').change(function(){
-    	 toggleSocialOptions();
+    	// toggleSocialOptions();
     });
     
     
@@ -319,6 +321,7 @@ jQuery(document).ready(function($){
     	boxRoll();
     	parallaxHeader();
     	$('.nectar-metabox-table textarea#_nectar_slider_caption, .nectar-metabox-table input#_nectar_slider_heading').parents('td').attr('colspan','2');
+    	fullScreenRows();
     });
     
     function checkButtonStyle(){
@@ -572,5 +575,46 @@ jQuery(document).ready(function($){
 	     }
      }
 
+
+     function fullScreenRows(){
+
+     	if($('#nectar-metabox-fullscreen-rows ._nectar_full_screen_rows .ui-state-active').attr('for') != 'nectar_meta_on') {
+     		$('#nectar-metabox-page-header').show();
+     		setTimeout(function(){
+     			$('#nectar-metabox-fullscreen-rows .nectar-metabox-table tr:not(:first-child)').attr('style','display: none;');
+     		},100);
+     	} else {
+     		$('#nectar-metabox-page-header').hide();
+     		$('#nectar-metabox-fullscreen-rows .nectar-metabox-table tr').attr('style','display: table-row;');
+     	}
+
+     	if($('select[name="nectar_meta[_nectar_full_screen_rows_animation]"]').val() != 'none') {
+     		$('label[for=_nectar_full_screen_rows_overall_bg_color]').parents('tr').show();
+     	} else {
+     		$('label[for=_nectar_full_screen_rows_overall_bg_color]').parents('tr').hide();
+     	}
+
+     }
+     $('._nectar_full_screen_rows, select[name="nectar_meta[_nectar_full_screen_rows_animation]"]').change(fullScreenRows);
+
+
+     //salient studio scrolling pointer events
+     if($('.vc_edit-form-tab[data-tab="default_templates"] > .vc_col-sm-12').length > 0) {
+	     var studioScrollTimer;
+	     var $studioScrollPanel = $('.vc_edit-form-tab[data-tab="default_templates"] > .vc_col-sm-12');
+
+		$studioScrollPanel.on('scroll',function(){
+
+			 clearTimeout(studioScrollTimer);
+			  if(!$studioScrollPanel.hasClass('nectar-disable-hover')) {
+			    $studioScrollPanel.addClass('nectar-disable-hover')
+			  }
+			  
+			  studioScrollTimer = setTimeout(function(){
+			    $studioScrollPanel.removeClass('nectar-disable-hover')
+			  },400);
+		});
+	}
+    
 
 });

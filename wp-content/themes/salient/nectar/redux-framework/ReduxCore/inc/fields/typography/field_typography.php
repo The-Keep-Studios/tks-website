@@ -656,7 +656,15 @@ if ( ! class_exists( 'ReduxFramework_typography' ) ) {
             }
 
             if ( ! empty( $subsets ) ) {
-                $link .= "&amp;subset=" . implode( ',', $subsets );
+
+                function subsetFilter($string) {
+                    return strpos($string, 'subset') === false;
+                }
+
+                $filteredSubsets = array_filter($subsets, 'subsetFilter');
+                
+            	if(!empty($filteredSubsets))
+               	   $link .= "&amp;subset=" . implode( ',', $filteredSubsets );
             }
 
 

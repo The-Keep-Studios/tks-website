@@ -144,7 +144,17 @@ wp_enqueue_script('iosSlider'); ?>
 
 		<?php woocommerce_cart_totals(); ?>
 		<?php woocommerce_shipping_calculator(); ?>
-		<input type="submit" class="button" name="update_cart" value="<?php _e( 'Update Cart', 'woocommerce' ); ?>" /> <input type="submit" class="checkout-button button alt wc-forward" name="proceed" value="<?php _e( 'Proceed to Checkout', 'woocommerce' ); ?>" />
+		<input type="submit" class="button" name="update_cart" value="<?php _e( 'Update Cart', 'woocommerce' ); ?>" /> 
+
+		<?php 
+		global $woocommerce;
+		if(!version_compare( $woocommerce->version, '2.6', ">=" )) { ?>
+			<input type="submit" class="checkout-button button alt wc-forward" name="proceed" value="<?php _e( 'Proceed to Checkout', 'woocommerce' ); ?>" />
+		<?php } else { ?>
+			<div class="wc-proceed-to-checkout">
+				<?php do_action( 'woocommerce_proceed_to_checkout' ); ?>
+			</div>
+		<?php } ?>
 
 		<?php wp_nonce_field( 'woocommerce-cart' ); ?>
 

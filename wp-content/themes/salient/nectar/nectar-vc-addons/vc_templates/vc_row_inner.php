@@ -42,6 +42,10 @@
 	  'custom_text_color' => '',  
 	  'id' => '',
 	  'el_id' => '',
+	  'equal_height' => '',
+	  'content_placement' => '',
+	  'column_margin' => 'default',
+	  'css' => '',
 	  'class' => ''), 
 	$atts));
 	
@@ -138,12 +142,24 @@
 		
 		$main_class = "full-width-content ";
 	}
-	 
+
+	//equal height
+	if($equal_height == 'yes')
+		$equal_height_class = ' vc_row-o-equal-height vc_row-flex ';
+	else 
+	 	$equal_height_class = '';
+
+	 if ( ! empty( $content_placement ) ) {
+		$equal_height_class .= ' vc_row-o-content-' . $content_placement.' ';
+	}
+		 
 	 
 	$row_id = (!empty($el_id)) ? $el_id: uniqid("fws_");
-	 
+	if(!empty($id)) { $row_id = $id; }
+	$css_class = apply_filters( VC_SHORTCODE_CUSTOM_CSS_FILTER_TAG, vc_shortcode_custom_css_class( $css, ' ' ), $this->settings['base'], $atts );
+	
     echo'
-	<div id="'.$row_id.'" data-midnight="'.strtolower($text_color).'" data-bg-mobile-hidden="'.$background_image_mobile_hidden.'" class="wpb_row vc_row-fluid vc_row '. $main_class . $parallax_class . ' ' . $vertically_center_class . ' '. $class . ' " '.$using_custom_text_color.' style="'.$style.'">';
+	<div id="'.$row_id.'" data-midnight="'.strtolower($text_color).'" data-column-margin="'.$column_margin.'" data-bg-mobile-hidden="'.$background_image_mobile_hidden.'" class="wpb_row vc_row-fluid vc_row '. $main_class . $equal_height_class . $parallax_class . ' ' .  $css_class . ' '. $vertically_center_class . ' '. $class . ' " '.$using_custom_text_color.' style="'.$style.'">';
 	
 	//row bg 
 	echo '<div class="row-bg-wrap"> <div class="row-bg '.$using_image_class . ' ' . $using_bg_color_class . ' '. $etxra_class.'" '.$parallax_speed.' style="'.$bg_props.'"></div> </div>';

@@ -57,7 +57,7 @@
         // Set it you want google fonts to update weekly. A google_api_key value is required.
         'google_update_weekly' => false,
         // Must be defined to add google fonts to the typography module
-        'async_typography'     => true,
+        'async_typography'     => false,
         // Use a asynchronous font on the front end or font string
         //'disable_google_fonts_link' => true,                    // Disable this in case you want to create your own google fonts loader
         'admin_bar'            => false,
@@ -234,6 +234,10 @@
         )
     ) );
     
+    $border_border_sizes = array();
+    for($i = 1; $i<100; $i++) {
+         $border_border_sizes[$i] = $i;
+    }
      Redux::setSection( $opt_name, array(
         'title'            => __( 'Styling', 'redux-framework-demo' ),
         'id'               => 'general-settings-styling',
@@ -267,7 +271,9 @@
                 'subtitle' => 'This will effect the overall styling of buttons',
                 'options' => array(
                     "default" => "Default",
-                    "rounded" => "Rounded"
+                    "slightly_rounded" => "Slightly Rounded",
+                    "slightly_rounded_shadow" => "Slightly Rounded W/ Shadow",
+                    "rounded" => "Rounded",
                 ),
                 'default' => 'default' 
             ),
@@ -286,10 +292,10 @@
                 'id' => 'overall-bg-color',
                 'type' => 'color',
                 'title' => __('Overall Background Color', NECTAR_THEME_NAME), 
-                'subtitle' => 'Default is #f8f8f8', 
+                'subtitle' => 'Default is #ffffff', 
                 'transparent' => false,
                 'desc' => '',
-                'default' => ''
+                'default' => '#ffffff'
             ),
 
              array(
@@ -300,7 +306,34 @@
                 'transparent' => false,
                 'desc' => '',
                 'default' => ''
-            )
+            ),
+               array(
+                'id' => 'body-border',
+                'type' => 'switch',
+                'title' => __('Body Border (Passepartout)', NECTAR_THEME_NAME), 
+                'subtitle' => __('This will add a border around the edges of the screen', NECTAR_THEME_NAME),
+                'desc' => '',
+                'default' => '0' 
+            ),
+            array(
+                'id' => 'body-border-color',
+                'type' => 'color',
+                'required' => array( 'body-border', '=', '1' ),
+                'title' => __('Body Border Color', NECTAR_THEME_NAME), 
+                'subtitle' => 'Default is #ffffff', 
+                'transparent' => false,
+                'desc' => '',
+                'default' => '#ffffff'
+            ),
+            array(
+                'id' => 'body-border-size', 
+                'type' => 'select', 
+                'required' => array( 'body-border', '=', '1' ),
+                'title' => __('Body Border Size', NECTAR_THEME_NAME),
+                'subtitle' => 'Please choose your desired size in px here. Default is 20px.',
+                'options' => $border_border_sizes,
+                'default' => '20px' 
+            ),
         )
     ) );
 
@@ -361,16 +394,30 @@
                 'desc' => '',
                 'default' => '1' 
             ),
-             array(
+            array(
+                'id'        => 'max_container_width',
+                'type'      => 'slider',
+                'required' => array( 'ext_responsive', '=', '1' ),
+                'title'     => __('Max Website Container Width', NECTAR_THEME_NAME),
+                'subtitle'  => __('When using the extended responsive design your container will scale to a maximum width of 1425px, use this option if you\'d like to increase that value.', NECTAR_THEME_NAME),
+                'desc'      => __('', NECTAR_THEME_NAME),
+                "default"   => 1425,
+                "min"       => 1425,
+                "step"      => 1,
+                "max"       => 2000,
+                'display_value' => 'text'
+            ),
+                         array(
                 'id' => 'lightbox_script', 
                 'type' => 'select', 
                 'title' => __('Theme Lightbox', NECTAR_THEME_NAME),
                 'subtitle' => 'Please choose your desired lightbox script here',
                 'options' => array(
                     "pretty_photo" => "Pretty Photo",
-                    "magnific" => "Magnific"
+                    "magnific" => "Magnific",
+                    "none" => "None"
                 ),
-                'default' => 'pretty_photo' 
+                'default' => 'magnific' 
             ),
             array(
                 'id' => 'default-lightbox',
@@ -421,7 +468,7 @@
                     'easeOutBounce'=>'easeOutBounce',
                     'easeInOutBounce'=>'easeInOutBounce'
                 ),
-                'default' => 'linear' 
+                'default' => 'easeOutCubic' 
             ),
             array(
                 'id' => 'column_animation_timing', 
@@ -429,7 +476,7 @@
                 'title' => __('Column/Image Animation Timing', NECTAR_THEME_NAME),
                 'subtitle' => __('Enter the time in miliseconds e.g. "400" - default is "650"', NECTAR_THEME_NAME),
                 'desc' => '',
-                'default' => '650'
+                'default' => '750'
             ),
         )
     ) );
@@ -454,6 +501,14 @@
                 'subtitle' => __('Please enter in your google analytics tracking code here. <br/> Remember to include the <strong>entire script from google</strong>, if you just enter your tracking ID it won\'t work.', NECTAR_THEME_NAME),
                 'desc' => __('', NECTAR_THEME_NAME)
             ),
+            array(
+                'id' => 'google-maps-api-key', 
+                'type' => 'text', 
+                'title' => __('Google Maps API Key', NECTAR_THEME_NAME),
+                'subtitle' => __('In order to use Google maps you need to generate an API key and enter it here - please see the <a href="https://developers.google.com/maps/documentation/javascript/get-api-key#get-an-api-key">official documentation</a> for more information', NECTAR_THEME_NAME),
+                'desc' => '',
+                'default' => ''
+            ),
              array(
                 'id'=>'custom-css',
                 'type' => 'ace_editor',
@@ -467,13 +522,49 @@
     ) );
 
 
+    Redux::setSection( $opt_name, array(
+        'title'            => __( 'Toggle Theme Features', 'redux-framework-demo' ),
+        'id'               => 'general-settings-theme-features',
+        'subsection'       => true,
+        'fields'           => array(
+            array(
+                'id' => 'disable_tgm',
+                'type' => 'checkbox',
+                'title' => __('Disable Theme Reccomended Plugin Notifications', NECTAR_THEME_NAME), 
+                'subtitle' => __('This will remove the notifications shown for installing/updating reccomended theme plugins (Salient Visual Composer/WooCommerce/Contact From 7). Enable if you don\'t need them anymore & are fimilar with keeping track of plugin updates in WordPress. <b>Will yield Admin panel performance improvement</b>', NECTAR_THEME_NAME),
+                'desc' => '',
+                'default' => '0' 
+            ),
+
+            array(
+                'id' => 'disable_home_slider_pt',
+                'type' => 'checkbox',
+                'title' => __('Disable Home Slider', NECTAR_THEME_NAME), 
+                'subtitle' => __('This will remove the Home Slider post type <b>Will yield Admin panel & front-end performance improvement</b>', NECTAR_THEME_NAME),
+                'desc' => '',
+                'default' => '0' 
+            ),
+
+            array(
+                'id' => 'disable_nectar_slider_pt',
+                'type' => 'checkbox',
+                'title' => __('Disable Nectar Slider', NECTAR_THEME_NAME), 
+                'subtitle' => __('This will remove the Nectar Slider post type <b>Will yield Admin panel & front-end performance improvement</b>', NECTAR_THEME_NAME),
+                'desc' => '',
+                'default' => '0' 
+            ),
+           
+        )
+    ) );
+
+
     
 
     Redux::setSection( $opt_name, array(
         'id'               => 'accent-color',
         'customizer_width' => '450px',
         'icon' => 'el el-brush',
-        'title' => __('Accent Color', NECTAR_THEME_NAME),
+        'title' => __('Accent Colors', NECTAR_THEME_NAME),
         'desc' => __('All accent color related options are listed here.', NECTAR_THEME_NAME),
         'fields'           => array(
               array(
@@ -481,9 +572,9 @@
                 'type' => 'color',
                  'transparent' => false,
                 'title' => __('Accent Color', NECTAR_THEME_NAME), 
-                'subtitle' => __('Change this color to alter the accent color globally for your site. If you\'re stuck, try one of the six pre-picked colors that are guaranteed to look awesome!', NECTAR_THEME_NAME), 
+                'subtitle' => __('Change this color to alter the accent color globally for your site.', NECTAR_THEME_NAME), 
                 'desc' => '',
-                'default' => '#27CCC0'
+                'default' => '#3452ff'
             ),
             array(
                 'id' => 'extra-color-1',
@@ -492,7 +583,7 @@
                 'title' => __('Extra Color #1', NECTAR_THEME_NAME), 
                 'subtitle' => __('Applicable theme elements will have the option to choose this as a color <br/> (i.e. buttons, icons etc..)', NECTAR_THEME_NAME), 
                 'desc' => '',
-                'default' => '#f6653c'
+                'default' => '#ff1053'
             ),
             array(
                 'id' => 'extra-color-2',
@@ -511,6 +602,32 @@
                 'subtitle' => __('Applicable theme elements will have the option to choose this as a color <br/> (i.e. buttons, icons etc..)', NECTAR_THEME_NAME), 
                 'desc' => '',
                 'default' => '#333333'
+            ),
+
+            array(
+                'id' => 'extra-color-gradient',
+                'type' => 'color_gradient',
+                'transparent' => false,
+                'title' => __('Extra Color Gradient', NECTAR_THEME_NAME), 
+                'subtitle' => __('Applicable theme elements will have the option to choose this as a color <br/> (i.e. buttons, icons etc..)', NECTAR_THEME_NAME), 
+                'desc' => '',
+                'default'  => array(
+                    'from' => '#3452ff',
+                    'to'   => '#ff1053' 
+                ),
+            ),
+
+             array(
+                'id' => 'extra-color-gradient-2',
+                'type' => 'color_gradient',
+                'transparent' => false,
+                'title' => __('Extra Color Gradient #2', NECTAR_THEME_NAME), 
+                'subtitle' => __('Applicable theme elements will have the option to choose this as a color <br/> (i.e. buttons, icons etc..)', NECTAR_THEME_NAME), 
+                'desc' => '',
+                'default'  => array(
+                    'from' => '#2AC4EA',
+                    'to'   => '#32d6ff' 
+                ),
             ),
             
         )
@@ -878,7 +995,27 @@
                 'default'  => array()
             ),
 
-           
+            array(
+                'id'       => 'portfolio_filters_font_family',
+                'type'     => 'typography',
+                'title'    => __( 'Portfolio Filters', 'redux-framework-demo' ),
+                'subtitle' => __( 'Specify the Portfolio filter font properties.', 'redux-framework-demo' ),
+                'google'   => true,
+                'fonts' =>  $nectar_std_fonts,
+                'all_styles'  => false,
+                'default'  => array()
+            ),
+
+            array(
+                'id'       => 'portfolio_caption_font_family',
+                'type'     => 'typography',
+                'title'    => __( 'Portfolio Caption/Excerpt', 'redux-framework-demo' ),
+                'subtitle' => __( 'Specify the Portfolio project caption/excerpt font properties.', 'redux-framework-demo' ),
+                'google'   => true,
+                'fonts' =>  $nectar_std_fonts,
+                'all_styles'  => false,
+                'default'  => array()
+            ),
 
              array(
                 'id'       => 'team_member_h_font_family',
@@ -980,6 +1117,15 @@ Redux::setSection( $opt_name, array(
             
            
 
+             array(
+                'id' => 'header-remove-fixed',
+                'type' => 'checkbox',
+                'title' => __('Header Remove Desktop Stickiness', NECTAR_THEME_NAME), 
+                'subtitle' => __('By default your header will always remain at the top of the screen even when scrolling down the page. Enabling this will remove that functionality and cause it to stay at the top of the page.', NECTAR_THEME_NAME),
+                'desc' => '',
+                'switch' => true,
+                'default' => '0' 
+            ),
 
              array(
                 'id' => 'header-mobile-fixed',
@@ -991,8 +1137,33 @@ Redux::setSection( $opt_name, array(
                 'default' => '1' 
             ),
            
-           
             
+             array(
+                'id' => 'header-box-shadow', 
+                'type' => 'select', 
+                'title' => __('Header Box Shadow', NECTAR_THEME_NAME),
+                'subtitle' => __('Please select your header box shadow here.', NECTAR_THEME_NAME),
+                'desc' => '',
+                'options' => array(
+                    'small' => __('Small', NECTAR_THEME_NAME), 
+                    'large' => __('Large', NECTAR_THEME_NAME),
+                    'none' => __('None', NECTAR_THEME_NAME)
+                ),
+                'default' => 'small'
+            ),
+
+             array(
+                'id'        => 'header-menu-item-spacing',
+                'type'      => 'slider',
+                'title'     => __('Menu Item Spacing', NECTAR_THEME_NAME),
+                'subtitle'  => __('Set the padding that will display on each side of your header menu items - space will be set in pixels.', NECTAR_THEME_NAME),
+                'desc'      => __('', NECTAR_THEME_NAME),
+                "default"   => 10,
+                "min"       => 8,
+                "step"      => 1,
+                "max"       => 50,
+                'display_value' => 'label'
+            ),
               array(
                 'id' => 'header-bg-opacity',
                 'type'      => 'slider',
@@ -1005,7 +1176,6 @@ Redux::setSection( $opt_name, array(
                 "max"       => 100,
                 'display_value' => 'label'
             ),
-
             
             array(
                 'id' => 'header-color', 
@@ -1105,6 +1275,30 @@ Redux::setSection( $opt_name, array(
                 'transparent' => false,
                 'default' => '#27CCC0'
             ),
+
+            array(
+                'id' => 'header-dropdown-heading-font-color',
+                'type' => 'color',
+                'title' => '',
+                'subtitle' => __('Mega Menu Heading Font', NECTAR_THEME_NAME), 
+                'required' => array( 'header-color', '=', 'custom' ),
+                'class' => 'five-columns',
+                'transparent' => false,
+                'desc' => '',
+                'default' => '#ffffff'
+            ),
+
+            array(
+                'id' => 'header-separator-color',
+                'type' => 'color',
+                'title' => '',
+                'subtitle' => __('Header Separators', NECTAR_THEME_NAME), 
+                'required' => array( 'header-color', '=', 'custom' ),
+                'class' => 'five-columns',
+                'transparent' => false,
+                'desc' => '',
+                'default' => '#eeeeee'
+            ),
             
             array(
                 'id' => 'secondary-header-background-color',
@@ -1146,7 +1340,7 @@ Redux::setSection( $opt_name, array(
                 'id' => 'header-slide-out-widget-area-background-color',
                 'type' => 'color',
                 'title' => '', 
-                'subtitle' => __('Slide Out Widget Background', NECTAR_THEME_NAME),
+                'subtitle' => __('Off Canvas Navigation Background', NECTAR_THEME_NAME),
                 'required' => array( 'header-color', '=', 'custom' ),
                 'desc' => '',
                 'class' => 'five-columns',
@@ -1158,7 +1352,7 @@ Redux::setSection( $opt_name, array(
                 'id' => 'header-slide-out-widget-area-header-color',
                 'type' => 'color',
                 'title' => '', 
-                'subtitle' => __('Slide Out Widget Headers', NECTAR_THEME_NAME), 
+                'subtitle' => __('Off Canvas Navigation Headers', NECTAR_THEME_NAME), 
                 'required' => array( 'header-color', '=', 'custom' ),
                 'class' => 'five-columns',
                 'transparent' => false,
@@ -1170,7 +1364,7 @@ Redux::setSection( $opt_name, array(
                 'id' => 'header-slide-out-widget-area-color',
                 'type' => 'color',
                 'title' => '', 
-                'subtitle' => __('Slide Out Widget Text', NECTAR_THEME_NAME), 
+                'subtitle' => __('Off Canvas Navigation Text', NECTAR_THEME_NAME), 
                 'required' => array( 'header-color', '=', 'custom' ),
                 'class' => 'five-columns',
                 'transparent' => false,
@@ -1182,7 +1376,7 @@ Redux::setSection( $opt_name, array(
                 'id' => 'header-slide-out-widget-area-hover-color',
                 'type' => 'color',
                 'title' => '', 
-                'subtitle' => __('Slide Out Widget Link Hover', NECTAR_THEME_NAME),
+                'subtitle' => __('Off Canvas Navigation Link Hover', NECTAR_THEME_NAME),
                 'class' => 'five-columns',
                 'required' => array( 'header-color', '=', 'custom' ),
                 'transparent' => false,
@@ -1213,12 +1407,15 @@ Redux::setSection( $opt_name, array(
                 'id' => 'header_format',
                 'type' => 'image_select',
                 'title' => __('Header Layout', NECTAR_THEME_NAME), 
-                'subtitle' => __('Please select the layout you desire', NECTAR_THEME_NAME),
+                'subtitle' => __('Please select the layout you desire. The Left header does not allow some of the options other headers do such as "transparency", and effects like "resize on scroll".', NECTAR_THEME_NAME),
                 'desc' => __('', NECTAR_THEME_NAME),
                 'options' => array(
                                 'default' => array('title' => 'Default Layout', 'img' => NECTAR_FRAMEWORK_DIRECTORY.'options/img/default-header.png'),
                                 'centered-menu' => array('title' => 'Centered Menu', 'img' => NECTAR_FRAMEWORK_DIRECTORY.'options/img/centered-menu.png'),
-                                'centered-menu-under-logo' => array('title' => 'Centered Menu Alt', 'img' => NECTAR_FRAMEWORK_DIRECTORY.'options/img/centered-menu-under-logo.png')
+                                'centered-menu-under-logo' => array('title' => 'Centered Menu Alt', 'img' => NECTAR_FRAMEWORK_DIRECTORY.'options/img/centered-menu-under-logo.png'),
+                                'centered-logo-between-menu' => array('title' => 'Centered Logo Between Menu', 'img' => NECTAR_FRAMEWORK_DIRECTORY.'options/img/centered-logo-menu.png'),
+                                'menu-left-aligned' => array('title' => 'Menu Left Aligned', 'img' => NECTAR_FRAMEWORK_DIRECTORY.'options/img/menu-left-aligned.png'),
+                                'left-header' => array('title' => 'Left Header', 'img' => NECTAR_FRAMEWORK_DIRECTORY.'options/img/fixed-left.png')
                             ),
                 'default' => 'default'
             ),  
@@ -1247,7 +1444,7 @@ Redux::setSection( $opt_name, array(
                 'title' => __('Disable AJAX from search', NECTAR_THEME_NAME), 
                 'subtitle' => __('This will turn off the autocomplete suggestions from appearing when typing in the search box.', NECTAR_THEME_NAME),
                 'desc' => '',
-                'default' => '0' 
+                'default' => '1' 
             ),
 
              array(
@@ -1268,8 +1465,7 @@ Redux::setSection( $opt_name, array(
                 'title' => __('Enable Social Icons?', NECTAR_THEME_NAME), 
                 'subtitle' => __('Do you want the secondary nav to display social icons?', NECTAR_THEME_NAME),
                 'desc' => '',
-                'default' => '0',
-                'required' => array( 'header_layout', '=', 'header_with_secondary' ),
+                'default' => '0'
             ),  
              array(
                 'id' => 'use-facebook-icon-header',
@@ -1497,6 +1693,16 @@ Redux::setSection( $opt_name, array(
                 'default' => '#ffffff'
             ),
             array(
+                'id' => 'header-transparent-dark-color',
+                'type' => 'color',
+                'title' => __('Header Dark Text Color', NECTAR_THEME_NAME),
+                'subtitle' => __('Please select the color you desire for your header navigation links when the dark header is triggered. This occurs on dark Nectar Slides, dark rows when using permenant transparent etc.', NECTAR_THEME_NAME),
+                'desc' => '',
+                'transparent' => false,
+                'required' => array( 'transparent-header', '=', '1' ),
+                'default' => '#000000'
+            ),
+            array(
                 'id' => 'header-permanent-transparent',
                 'type' => 'checkbox',
                 'switch' => true,
@@ -1545,10 +1751,10 @@ Redux::setSection( $opt_name, array(
                 'subtitle' => __('Please select your header link hover/active effect here.', NECTAR_THEME_NAME),
                 'desc' => '',
                 'options' => array(
-                    'default' => __('Color Change (default)', NECTAR_THEME_NAME), 
+                    'default' => __('Color Change', NECTAR_THEME_NAME), 
                     'animated_underline' => __('Animated Underline', NECTAR_THEME_NAME)
                 ),
-                'default' => 'default'
+                'default' => 'animated_underline'
             ),
             array(
                 'id' => 'header-hide-until-needed',
@@ -1585,12 +1791,88 @@ Redux::setSection( $opt_name, array(
 
 
 Redux::setSection( $opt_name, array(
+        'title'            => __( 'Dropdown/Megamenu', 'redux-framework-demo' ),
+        'id'               => 'header-nav-dropdowns',
+        'subsection'       => true,
+        'fields'           => array(
+              
+             
+           
+             array(
+                'id' => 'header-dropdown-style', 
+                'type' => 'select', 
+                'title' => __('Header Dropdown Style', NECTAR_THEME_NAME),
+                'subtitle' => __('Please select the style that will be used for submenus in your main navigation', NECTAR_THEME_NAME),
+                'desc' => '',
+                'options' => array(
+                    'classic' => __('Classic', NECTAR_THEME_NAME), 
+                    'minimal' => __('Minimal', NECTAR_THEME_NAME)
+                ),
+                'default' => 'classic'
+            ),  
+
+            array(
+                'id' => 'header-dropdown-opacity',
+                'type'      => 'slider',
+                'title'     => __('Header Dropdown Opacity', NECTAR_THEME_NAME),
+                'subtitle'  => __('Please select your dropdown opacity here', NECTAR_THEME_NAME),
+                'desc'      => __('', NECTAR_THEME_NAME),
+                "default"   => 100,
+                "min"       => 1,
+                "step"      => 1,
+                "max"       => 100,
+                'display_value' => 'label'
+            ),
+
+
+            array(
+                'id' => 'header-megamenu-width', 
+                'type' => 'select', 
+                'title' => __('Header Mega Menu Width', NECTAR_THEME_NAME),
+                'subtitle' => __('Please choose whether you would like your megamenu to be constraiuned to the same width of the header container or if you would prefer to be the full width of the page.', NECTAR_THEME_NAME),
+                'desc' => '',
+                'options' => array(
+                    'contained' => __('Contained To Header Item Width', NECTAR_THEME_NAME), 
+                    'full-width' => __('Full Screen Width', NECTAR_THEME_NAME)
+                ),
+                'default' => 'contained'
+            ),  
+
+            array(
+                'id' => 'header-megamenu-remove-transparent',
+                'type' => 'switch',
+                'title' => __('Megamenu Removes Transparent Header', NECTAR_THEME_NAME), 
+                'subtitle' => __('This will cause your header navigation to temporarily disable the transparent effect when your megamenu is open', NECTAR_THEME_NAME),
+                'desc' => '',
+                'default' => '0' 
+            ),
+            
+
+             
+        )
+    ) );
+
+
+Redux::setSection( $opt_name, array(
         'title'            => __( 'Off Canvas Navigation', 'redux-framework-demo' ),
         'id'               => 'header-nav-off-canvas-navigation',
         'subsection'       => true,
         'fields'           => array(
               
-             
+          array(
+                'id' => 'header-slide-out-widget-area-style', 
+                'type' => 'select', 
+                'title' => __('Off Canvas Menu Style', NECTAR_THEME_NAME),
+                'subtitle' => __('Please select your off canvas menu style here. <br/> The "Slide Out From Right Hover Triggered" style will force the "Full Width Header" option regardless of your selection.', NECTAR_THEME_NAME),
+                'desc' => '',
+                'options' => array(
+                    'slide-out-from-right' => __('Slide Out From Right', NECTAR_THEME_NAME), 
+                    'slide-out-from-right-hover' => __('Slide Out From Right Hover Triggered', NECTAR_THEME_NAME), 
+                    'fullscreen' => __('Fullscreen Cover Slide + Blur BG', NECTAR_THEME_NAME),
+                    'fullscreen-alt' => __('Fullscreen Cover Fade', NECTAR_THEME_NAME)
+                ),
+                'default' => 'slide-out-from-right',
+            ),
           array(
                 'id' => 'header-slide-out-widget-area',
                 'type' => 'switch',
@@ -1600,17 +1882,17 @@ Redux::setSection( $opt_name, array(
                 'default' => '0' 
             ),
             array(
-                'id' => 'header-slide-out-widget-area-style', 
+                'id' => 'header-slide-out-widget-area-icon-animation', 
                 'type' => 'select', 
-                'title' => __('Off Canvas Menu Style', NECTAR_THEME_NAME),
-                'subtitle' => __('Please select your off canvas menu style here.', NECTAR_THEME_NAME),
+                'title' => __('Off Canvas Menu Hamburger Animation', NECTAR_THEME_NAME),
+                'subtitle' => __('Please select your off canvas menu hamburger icon animation here.', NECTAR_THEME_NAME),
                 'desc' => '',
                 'options' => array(
-                    'slide-out-from-right' => __('Slide Out From Right', NECTAR_THEME_NAME), 
-                    'fullscreen' => __('Fullscreen Cover', NECTAR_THEME_NAME)
+                    'spin-and-transform' => __('Spin & Transform', NECTAR_THEME_NAME), 
+                    'simple-transform' => __('Simple Transform', NECTAR_THEME_NAME)
                 ),
-                'default' => 'slide-out-from-right',
-                  'required' => array( 'header-slide-out-widget-area', '=', '1' ),
+                'default' => 'simple-transform',
+                'required' => array( 'header-slide-out-widget-area', '=', '1' ),
             ),
             array(
                 'id' => 'header-slide-out-widget-area-social',
@@ -1638,6 +1920,7 @@ Redux::setSection( $opt_name, array(
                 'desc' => '',
                  'required' => array( 'header-slide-out-widget-area', '=', '1' ),
                 'options' => array(
+                    'solid' => __('Solid', NECTAR_THEME_NAME), 
                     'dark' => __('Dark', NECTAR_THEME_NAME), 
                     'medium' => __('Medium', NECTAR_THEME_NAME),
                     'light' => __('Light', NECTAR_THEME_NAME)
@@ -1682,12 +1965,14 @@ Redux::setSection( $opt_name, array(
                 'type' => 'image_select',
                 'required' => array( 'enable-main-footer-area', '=', '1' ),
                 'title' => __('Footer Columns', NECTAR_THEME_NAME), 
-                'subtitle' => __('Please select the number of columns you would like for your footer.', NECTAR_THEME_NAME),
+                'subtitle' => __('Please select the number of columns you would like for your footer. <i>Note: using the 1 Column layout will also center the copyright area.</i>', NECTAR_THEME_NAME),
                 'desc' => __('', NECTAR_THEME_NAME),
                 'options' => array(
+                                '1' => array('title' => '1 Column Centered', 'img' => NECTAR_FRAMEWORK_DIRECTORY.'options/img/1colg.png'),
                                 '2' => array('title' => '2 Columns', 'img' => NECTAR_FRAMEWORK_DIRECTORY.'options/img/2col.png'),
                                 '3' => array('title' => '3 Columns', 'img' => NECTAR_FRAMEWORK_DIRECTORY.'options/img/3col.png'),
-                                '4' => array('title' => '4 Columns', 'img' => NECTAR_FRAMEWORK_DIRECTORY.'options/img/4col.png')
+                                '4' => array('title' => '4 Columns', 'img' => NECTAR_FRAMEWORK_DIRECTORY.'options/img/4col.png'),
+                                '5' => array('title' => '4 Columns Alt', 'img' => NECTAR_FRAMEWORK_DIRECTORY.'options/img/4colalt.png')
                             ),
                 'default' => '4'
             ),  
@@ -1759,6 +2044,17 @@ Redux::setSection( $opt_name, array(
                 'default' => '#777777',
                 'transparent' => false
             ),
+            array(
+                'id' => 'footer-copyright-icon-hover-color',
+                'type' => 'color',
+                 'required' => array( 'footer-custom-color', '=', '1' ),
+                'title' => '', 
+                'class' => 'five-columns always-visible',
+                'subtitle' => __('Footer Copyright Icon  Hover Color', NECTAR_THEME_NAME), 
+                'desc' => '',
+                'default' => '#ffffff',
+                'transparent' => false
+            ),
               array(
                 'id' => 'footer-copyright-line', 
                 'type' => 'checkbox', 
@@ -1766,6 +2062,16 @@ Redux::setSection( $opt_name, array(
                 'subtitle' => __('This will add a thin line to separate your footer widget area from the copyright section', NECTAR_THEME_NAME),
                 'default' => '' 
             ),
+
+            array(
+                'id' => 'footer-full-width',
+                'type' => 'switch',
+                'title' => __('Footer Full Width', NECTAR_THEME_NAME), 
+                'subtitle' => __('This to cause your footer content to display full width.', NECTAR_THEME_NAME),
+                'desc' => '',
+                'default' => '0' 
+            ), 
+
 
              array(
                 'id' => 'footer-reveal',
@@ -1816,7 +2122,28 @@ Redux::setSection( $opt_name, array(
                 'desc' => ''
             ),
             
-            
+            array(
+                'id' => 'footer-background-image',
+                'type' => 'media',
+                'title' => __('Footer Background Image', NECTAR_THEME_NAME), 
+                'subtitle' => __('Upload an image that will be used as the background image on your footer. ', NECTAR_THEME_NAME),
+                'desc' => ''
+            ),
+
+            array(
+                'id'        => 'footer-background-image-overlay',
+                'type'      => 'slider',
+                'title'     => __('Footer Background Overlay', NECTAR_THEME_NAME),
+                'subtitle'  => __('Adjust the overlay opacity here - the overlay colors pulls from your defined footer background color.', NECTAR_THEME_NAME),
+                'desc'      => __('', NECTAR_THEME_NAME),
+                "default"   => 0.8,
+                "min"       => 0,
+                "step"      => 0.1,
+                "max"       => 1,
+                "resolution" => 0.1,
+                'display_value' => 'text'
+            ),
+
             array(
                 'id' => 'use-facebook-icon',
                 'type' => 'checkbox',
@@ -2002,14 +2329,41 @@ Redux::setSection( $opt_name, array(
                 'subtitle' => __('Please select your transition effect here', NECTAR_THEME_NAME),
                 'options' => array(
                     "standard" => "Fade with loading icon",
-                    "center_mask_reveal" => "Center mask reveal"
+                    "center_mask_reveal" => "Center mask reveal",
+                    "horizontal_swipe" => "Horizontal multi layer swipe"
                 ),
                 'default' => 'standard'
             ),
 
+            array(
+                'id' => 'loading-icon', 
+                'type' => 'select', 
+                'required' => array( 'transition-effect', '=', 'standard' ),
+                'title' => __('Loading Icon Style', NECTAR_THEME_NAME),
+                'subtitle' => __('Select your loading icon style here', NECTAR_THEME_NAME),
+                'options' => array(
+                    "default" => "Default",
+                    "material" => "Material Design"
+                ),
+                'default' => 'material'
+            ),
+            array(
+                'id' => 'loading-icon-colors',
+                'type' => 'color_gradient',
+                'transparent' => false,
+                'title' => __('Loading Icon Coloring', NECTAR_THEME_NAME), 
+                'subtitle' => __('The icon will animate between the two colors - or just use the first if a second is not supplied.', NECTAR_THEME_NAME), 
+                'desc' => '',
+                'required' => array( 'loading-icon', '=', 'material' ),
+                'default'  => array(
+                    'from' => '#3452ff',
+                    'to'   => '#3452ff' 
+                ),
+            ),
              array(
                 'id' => 'loading-image',
                 'type' => 'media',
+                'required' => array( 'transition-effect', '=', 'standard' ),
                 'title' => __('Custom Loading Image', NECTAR_THEME_NAME), 
                 'subtitle' => __('Upload a .png or .gif image that will be used in all applicable areas on your site as the loading image. ', NECTAR_THEME_NAME),
                 'desc' => ''
@@ -2017,6 +2371,7 @@ Redux::setSection( $opt_name, array(
              array(
                 'id' => 'loading-image-animation', 
                 'type' => 'select', 
+                'required' => array( 'transition-effect', '=', 'standard' ),
                 'title' => __('Loading Image CSS Animation', NECTAR_THEME_NAME),
                 'subtitle' => __('This will add a css based animation onto your defined image', NECTAR_THEME_NAME),
                 'options' => array(
@@ -2032,6 +2387,16 @@ Redux::setSection( $opt_name, array(
                 'subtitle' =>  __('Use this to define the color of your page transition background.', NECTAR_THEME_NAME), 
                 'desc' => '',
                 'default' => '',
+                'transparent' => false
+            ),
+              array(
+                'id' => 'transition-bg-color-2',
+                'type' => 'color',
+                'title' => __('Page Transition BG Color 2', NECTAR_THEME_NAME), 
+                'subtitle' =>  __('Use this to define the second color of your page transition background.', NECTAR_THEME_NAME), 
+                'desc' => '',
+                'default' => '',
+                'required' => array( 'transition-effect', '=', 'horizontal_swipe' ),
                 'transparent' => false
             )
         
@@ -2050,7 +2415,7 @@ Redux::setSection( $opt_name, array(
          'icon'   => 'el el-file',
         'fields' => array(
 
-               array(
+            array(
                 'id' => 'header-animate-in-effect', 
                 'type' => 'select', 
                 'title' => __('Load In Animation', NECTAR_THEME_NAME),
@@ -2061,6 +2426,18 @@ Redux::setSection( $opt_name, array(
                     "zoom-out" => "Slight Zoom Out"
                 ),
                 'default' => 'none'
+            ),
+
+            array(
+                'id' => 'header-down-arrow-style', 
+                'type' => 'select', 
+                'title' => __('Down Arrow Style', NECTAR_THEME_NAME),
+                'subtitle' => __('Page headers that are set to fullscreen will show an arrow at the bottom so the user knows there is more content below - select the style for that here.', NECTAR_THEME_NAME),
+                'options' => array(
+                    "default" => "Default",
+                    "scroll-animation" => "Scroll Animation"
+                ),
+                'default' => 'default'
             ),
         
 
@@ -2087,7 +2464,7 @@ Redux::setSection( $opt_name, array(
                     "default" => "Inherit from theme skin",
                     "minimal" => "Minimal"
                 ),
-                'default' => 'default'
+                'default' => 'minimal'
             ),
 
               array(
@@ -2097,6 +2474,20 @@ Redux::setSection( $opt_name, array(
                 'subtitle' => __('This will ensure the styling of your advanced form elements look consistent on all browsers and are more user friendly.', NECTAR_THEME_NAME),
                 'desc' => '',
                 'default' => '0' 
+            ),
+
+            array(
+                'id' => 'form-submit-btn-style', 
+                'type' => 'select', 
+                'title' => __('Submit Button Style', NECTAR_THEME_NAME),
+                'subtitle' => __('Select your desired style which will be used for submit buttons throughout your site', NECTAR_THEME_NAME),
+                'desc' => '',
+                'options' => array(
+                    'default' => __('Default', NECTAR_THEME_NAME), 
+                    'regular' => __('Nectar Btn', NECTAR_THEME_NAME),
+                    'see-through' => __('Nectar Btn See Through', NECTAR_THEME_NAME)            
+                ),
+                'default' => 'regular'
             )
         
 
@@ -2230,6 +2621,8 @@ Redux::setSection( $opt_name, array(
                 'options' => array(
                                 '1' => __('Meta below thumb w/ links on hover', NECTAR_THEME_NAME),
                                 '2' => __('Meta on hover + entire thumb link', NECTAR_THEME_NAME),
+                                '7' => __('Meta on hover w/ zoom + entire thumb link', NECTAR_THEME_NAME),
+                                '8' => __('Meta overlaid - bottom left aligned', NECTAR_THEME_NAME),
                                 '3' => __("Title overlaid w/ zoom effect on hover", NECTAR_THEME_NAME),
                                 '5' => __("Title overlaid w/ zoom effect on hover alt", NECTAR_THEME_NAME),
                                 '4' => __("Meta from bottom on hover + entire thumb link", NECTAR_THEME_NAME),
@@ -2237,6 +2630,32 @@ Redux::setSection( $opt_name, array(
                             ),
                 'default' => '1'
             ),
+
+            array(
+                'id' => 'main_portfolio_item_spacing',
+                'type' => 'select',
+                'title' => __('Project Item Spacing', NECTAR_THEME_NAME), 
+                'subtitle' => __('Please select the spacing you would like between your items', NECTAR_THEME_NAME),
+                'desc' => __('', NECTAR_THEME_NAME),
+                'options' => array(
+                                "default" => "Default",
+                                "1px" => "1px",
+                                "2px" => "2px",
+                                "3px" => "3px",
+                                "4px" => "4px",
+                                "5px" => "5px",
+                                "6px" => "6px",
+                                "7px" => "7px",
+                                "8px" => "8px",
+                                "9px" => "9px",
+                                "10px" => "10px",
+                                "15px" => "15px",
+                                "20px" => "20px"
+                            ),
+                'default' => 'default',
+                'required' => array( 'main_portfolio_layout', '=', 'fullwidth' )
+            ),
+
             array(
                 'id' => 'portfolio_use_masonry', 
                 'type' => 'checkbox',
@@ -2246,6 +2665,18 @@ Redux::setSection( $opt_name, array(
                 'switch' => true,
                 'default' => '0' 
             ),  
+            array(
+                'id' => 'portfolio_masonry_grid_sizing',
+                'type' => 'select',
+                'title' => __('Masonry Grid Sizing', NECTAR_THEME_NAME), 
+                'subtitle' => __('Please select the grid layout for your masonry portfolio. This will change the dimensions of the "Masonry Item Sizing" field you choose for your projects in the project configuration metabox. After changing this, you will need to run the <a target="_blank" href="https://wordpress.org/plugins/regenerate-thumbnails/">regenerate thumbnails</a> plugin to recrop any featured images that are already uploaded. You must upload your images at a minimum of these dimensions or larger - uploading smaller than the size chosen will result in an incorrect layout.<br/> <strong class="top-margin">Square Based Grid</strong><br/><table class="masonry_table"><tr><th>Masonry Size</th><th>Dimensions</th></tr><tr><td>Regular</td><td>500x500</td></tr><tr><td>Wide</td><td>1000x500</td></tr><tr><td>Tall</td><td>1000x500</td></tr><tr><td>Wide & Tall</td><td>1000x1000</td></tr></table>    <strong>Photography Based</strong><br/><table class="masonry_table"><tr><th>Masonry Size</th><th>Dimensions</th></tr><tr><td>Regular</td><td>450x600</td></tr><tr><td>Wide</td><td>900x600</td></tr><tr><td>Wide & Tall</td><td>900x1200</td></tr></table> ', NECTAR_THEME_NAME),
+                'desc' => __('', NECTAR_THEME_NAME),
+                'options' => array(
+                                "default" => "Sqaure Grid Based (Default)",
+                                "photography" => "Photography Based"
+                            ),
+                'default' => 'default'
+            ),
              array(
                 'id' => 'portfolio_inline_filters',
                 'type' => 'checkbox',
@@ -2263,7 +2694,8 @@ Redux::setSection( $opt_name, array(
                 'desc' => __('', NECTAR_THEME_NAME),
                 'options' => array(
                                 'in_header' => __('In Project Header', NECTAR_THEME_NAME),
-                                'after_project' => __('At Bottom Of Project', NECTAR_THEME_NAME)
+                                'after_project' => __('At Bottom Of Project', NECTAR_THEME_NAME),
+                                'after_project_2' => __('At Bottom W/ Featured Image', NECTAR_THEME_NAME)
                             ),
                 'default' => 'after_project'
             ),  
@@ -2276,7 +2708,8 @@ Redux::setSection( $opt_name, array(
                 'options' => array(
                                 "none" => "None",
                                 "fade_in" => "Fade In",
-                                "fade_in_from_bottom" => "Fade In From Bottom"
+                                "fade_in_from_bottom" => "Fade In From Bottom",
+                                "perspective" => "Perspective Fade In"
                             ),
                 'default' => 'fade_in_from_bottom'
             ),
@@ -2305,6 +2738,19 @@ Redux::setSection( $opt_name, array(
                 'desc' => '',
                 'default' => '1' 
             ),  
+             array(
+                'id' => 'portfolio_social_style',
+                'type' => 'select',
+                'title' => __('Social Sharing Style', NECTAR_THEME_NAME), 
+                'subtitle' => __('Please select the style you would like your portfolio sharing buttons to display in. Note: If using the default style, only non full width projects will be able to show them.', NECTAR_THEME_NAME),
+                'desc' => __('', NECTAR_THEME_NAME),
+                'required' => array( 'portfolio_social', '=', '1' ),
+                'options' => array(
+                                "default" => "In Sidebar (default)",
+                                "fixed_bottom_right" => "Fixed To Bottom Right Of Screen",
+                            ),
+                'default' => 'default'
+            ),
              array(
                 'id' => 'portfolio-facebook-sharing',
                 'type' => 'checkbox',
@@ -2484,6 +2930,19 @@ Redux::setSection( $opt_name, array(
                 ),
                 'default' => 'std-blog-sidebar'
             ), 
+             array(
+                'id' => 'blog_standard_type',
+                'type' => 'radio',
+                'title' => __('Standard Blog Style', NECTAR_THEME_NAME), 
+                'subtitle' => __('Please select the style you would like your posts to use when the standard layout is displayed', NECTAR_THEME_NAME),
+                'desc' => __('', NECTAR_THEME_NAME),
+                'options' => array(
+                                'classic' => __('Classic', NECTAR_THEME_NAME),
+                                'minimal' => __('Minimal', NECTAR_THEME_NAME)
+                            ),
+                'default' => 'classic',
+                'required' => array( 'blog_type', 'contains', 'std-blog' )
+            ),
             array(
                 'id' => 'blog_masonry_type',
                 'type' => 'radio',
@@ -2506,7 +2965,8 @@ Redux::setSection( $opt_name, array(
                 'options' => array(
                                 "none" => "None",
                                 "fade_in" => "Fade In",
-                                "fade_in_from_bottom" => "Fade In From Bottom"
+                                "fade_in_from_bottom" => "Fade In From Bottom",
+                                "perspective" => "Perspective Fade In"
                             ),
                 'default' => 'none'
             ),
@@ -2530,7 +2990,7 @@ Redux::setSection( $opt_name, array(
                 'title' => __('Hide Sidebar on Single Post', NECTAR_THEME_NAME), 
                 'subtitle' => __('Using this will remove the sidebar from appearing on your single post page.', NECTAR_THEME_NAME),
                 'desc' => '',
-                'default' => '0' 
+                'default' => '1' 
             ),  
             array(
                 'id' => 'blog_hide_featured_image',
@@ -2544,7 +3004,7 @@ Redux::setSection( $opt_name, array(
                 'id' => 'blog_archive_bg_image',
                 'type' => 'media',
                 'title' => __('Archive Header Background Image', NECTAR_THEME_NAME), 
-                'subtitle' => __('Upload an optional background that will be used on all blog achive pages.', NECTAR_THEME_NAME),
+                'subtitle' => __('Upload an optional background that will be used on all blog archive pages.', NECTAR_THEME_NAME),
                 'desc' => ''
             )
             
@@ -2565,7 +3025,7 @@ Redux::setSection( $opt_name, array(
                 'title' => __('Author\'s Bio', NECTAR_THEME_NAME), 
                 'subtitle' => __('Display the author\'s bio at the bottom of posts?', NECTAR_THEME_NAME),
                 'desc' => __('', NECTAR_THEME_NAME),
-                'default' => '0' 
+                'default' => '1' 
             ),
             array(
                 'id' => 'blog_auto_excerpt',
@@ -2601,6 +3061,19 @@ Redux::setSection( $opt_name, array(
                 'desc' => '',
                 'default' => '1' 
             ),  
+            array(
+                'id' => 'blog_social_style',
+                'type' => 'select',
+                'title' => __('Social Sharing Style', NECTAR_THEME_NAME), 
+                'subtitle' => __('Please select the style you would like your blog sharing buttons to display in."', NECTAR_THEME_NAME),
+                'desc' => __('', NECTAR_THEME_NAME),
+                'required' => array( 'blog_social', '=', '1' ),
+                'options' => array(
+                                "default" => "Default (Determined by Blog Header Type)",
+                                "fixed_bottom_right" => "Fixed To Bottom Right Of Screen",
+                            ),
+                'default' => 'default'
+            ),
              array(
                 'id' => 'blog-facebook-sharing',
                 'type' => 'checkbox',
@@ -3441,6 +3914,19 @@ Redux::setSection( $opt_name, array(
                         'default' => '1' 
                     ),
                     array(
+                        'id' => 'ajax-cart-style',
+                        'type' => 'select',
+                        'title' => __('Cart In Nav Style', NECTAR_THEME_NAME), 
+                        'subtitle' => __('Please select the style you would like for your AJAX cart', NECTAR_THEME_NAME),
+                        'desc' => __('', NECTAR_THEME_NAME),
+                        'options' => array(
+                                        "dropdown" => "Dropdown",
+                                        "slide_in" => "Slide In Full Page Height"
+                                    ),
+                        'default' => 'dropdown',
+                         'required' => array( 'enable-cart', '=', '1' ),
+                    ),
+                    array(
                         'id' => 'main_shop_layout',
                         'type' => 'image_select',
                         'title' => __('Main Shop Layout', NECTAR_THEME_NAME), 
@@ -3471,13 +3957,41 @@ Redux::setSection( $opt_name, array(
                         'id' => 'product_style',
                         'type' => 'radio',
                         'title' => __('Product Style', NECTAR_THEME_NAME), 
-                        'sub_desc' => __('Please select the style you would like your products to display in (single product page styling will also vary with each)', NECTAR_THEME_NAME),
+                        'sub_desc' => __('Please select the style you would like your products to display in (single product page styling will also vary slightly with each)', NECTAR_THEME_NAME),
                         'desc' => __('', NECTAR_THEME_NAME),
                         'options' => array(
                                         'classic' => __('Add to cart Icon on Hover (Classic)', NECTAR_THEME_NAME),
-                                        'text_on_hover' => __('Add to cart text on hover', NECTAR_THEME_NAME)
+                                        'text_on_hover' => __('Add to cart text on hover', NECTAR_THEME_NAME),
+                                        'material' => __('Add to cart text on hover (Material Design)', NECTAR_THEME_NAME)
                                     ),
-                        'default' => '1'
+                        'default' => 'classic'
+                    ),
+                     array(
+                        'id' => 'product_bg_color',
+                        'type' => 'color',
+                        'transparent' => false,
+                        'title' => __('Material Design Product Item BG Color', NECTAR_THEME_NAME), 
+                        'subtitle' => __('Set this to match the BG color of your product images.', NECTAR_THEME_NAME), 
+                        'desc' => '',
+                        'required' => array( 'product_style', '=', 'material' ),
+                        'default' => '#ffffff'
+                    ),
+                     array(
+                        'id' => 'product_archive_bg_color',
+                        'type' => 'color',
+                         'transparent' => false,
+                        'title' => __('Product Archive Page BG Color', NECTAR_THEME_NAME), 
+                        'subtitle' => __('Allows to you set the BG color for all product archive pages', NECTAR_THEME_NAME), 
+                        'desc' => '',
+                        'default' => '#f6f6f6'
+                    ),
+                     array(
+                        'id' => 'product_hover_alt_image',
+                        'type' => 'switch',
+                        'title' => __('Show first gallery image on Product hover', NECTAR_THEME_NAME), 
+                        'sub_desc' => __('', NECTAR_THEME_NAME),
+                        'desc' => 'Using this will cause your products to show the first gallery image (if supplied) on hover',
+                        'default' => '0' 
                     ),
                      array(
                         'id' => 'single_product_gallery_type',
@@ -3502,6 +4016,14 @@ Redux::setSection( $opt_name, array(
                                         'fullwidth' => __('Fullwidth Under Images', NECTAR_THEME_NAME)
                                     ),
                         'default' => 'in_sidebar'
+                    ),
+                     array(
+                        'id' => 'woo-products-per-page', 
+                        'type' => 'text', 
+                        'title' => __('Products Per Page', NECTAR_THEME_NAME),
+                        'subtitle' => __('Please enter your desired your products per page (default is 12)', NECTAR_THEME_NAME),
+                        'desc' => '',
+                        'validate' => 'numeric'
                     ),
                     array(
                         'id' => 'woo_social',

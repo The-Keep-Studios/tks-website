@@ -315,7 +315,12 @@ jQuery(document).ready(function($){
 		if(name == 'icon' && $('.icon-option i.selected').is('[data-svg-val]')) {  //svg icons
 			if(name == 'icon' && $('.icon-option i.selected').length > 0 || name == 'button' && $('.icon-option i.selected').length > 0) code += ' image="'+ $('.icon-option i.selected').attr('data-svg-val') +'"';  
 		} else { //standard icons
-			if(name == 'icon' && $('.icon-option i.selected').length > 0 || name == 'button' && $('.icon-option i.selected').length > 0) code += ' image="'+ $('.icon-option i.selected').attr('class').split(' ')[0] +'"'; 
+			if(name == 'icon' && $('.icon-option i.selected').length > 0 || name == 'button' && $('.icon-option i.selected').length > 0) { 
+				if($('.icon-option i.selected').attr('class').split(' ')[0] == 'fa')
+					code += ' image="'+ $('.icon-option i.selected').attr('class').split(' ')[1] +'"'; 
+				else 
+					code += ' image="'+ $('.icon-option i.selected').attr('class').split(' ')[0] +'"'; 
+			}
 		}
 		code += ']';
 
@@ -471,6 +476,7 @@ jQuery(document).ready(function($){
 				$('#options-icon input[data-attrname="animation_delay"], #options-icon select#animation_speed').parent().next('.clear').slideDown();
 				$('#options-icon input[data-attrname="animation_delay"], #options-icon select#animation_speed').parent().prev('.label').slideDown();
 			}
+			$('#options-icon #color').trigger('change');
 		} else {
 			$('label[for="shortcode-option-icon-size-regular"]').parent().slideDown();
 			$('label[for="shortcode-option-icon-size-regular"]').parent().prev('.label').slideDown();
@@ -500,6 +506,24 @@ jQuery(document).ready(function($){
 		}
 	});
 	
+	//color change
+	$('#options-icon #color').change(function(){
+		if($(this).val() == 'Extra-Color-Gradient-1' || $(this).val() == 'Extra-Color-Gradient-2' || $('select[name="icon-set-select"]').val() != 'linea') {
+			$('#options-icon #enable_animation').prop('checked', false);
+			$('#options-icon label[for="enable_animation"]').parent().slideUp();
+			$('#options-icon label[for="enable_animation"]').parent().next().slideUp();
+			$('#options-icon label[for="enable_animation"]').parent().next().next().slideUp();
+			$('#options-icon input.enable_animation').trigger('change');
+			$('#options-icon select#animation_speed, #options-icon input[data-attrname="animation_delay"]').addClass('skip-processing');
+		} else {
+			$('#options-icon label[for="enable_animation"]').parent().slideDown();
+			$('#options-icon label[for="enable_animation"]').parent().next().slideDown();
+			$('#options-icon label[for="enable_animation"]').parent().next().next().slideDown();
+			$('#options-icon select#animation_speed, #options-icon input[data-attrname="animation_delay"]').removeClass('skip-processing');
+		}
+	});
+	$('#options-icon #color').trigger('change');
+
 	//starting category population
 	$('.starting_category').hide();
 	$('.starting_category').next('.clear').hide();
@@ -545,12 +569,48 @@ jQuery(document).ready(function($){
 					$(this).parents('.content').prev('.label').show();
 					$(this).parents('.content').next('.clear').show();
 				} 
+
+				if($(this).parents('.content').prev('.label').find('strong').text() == 'Color Override:') {
+					$(this).parents('.content').show();
+					$(this).parents('.content').prev('.label').show();
+					$(this).parents('.content').next('.clear').show();
+				} 
 				
 				$('#hover_text_color_override').parents('.content').show();
 				$('#hover_text_color_override').parents('.content').prev('.label').show();
 				$('#hover_text_color_override').parents('.content').next('.clear').show();
+
+				$('#options-button [name="icon-set-select"]').parents('.content').show();
+				$('#options-button [name="icon-set-select"]').parents('.content').prev('.label').show();
+				$('#options-button [name="icon-set-select"]').parents('.content').next('.clear').show();
 				
 			});
+		} else if ($selected_style == 'extra-color-gradient-1' || $selected_style == 'extra-color-gradient-2' || $selected_style == 'see-through-extra-color-gradient-1' || $selected_style == 'see-through-extra-color-gradient-2') {
+
+			$('#options-button input.popup-colorpicker').each(function(){
+				
+				if($(this).parents('.content').prev('.label').find('strong').text() == 'Hover BG Color:') {
+					$(this).parents('.content').hide();
+					$(this).parents('.content').prev('.label').hide();
+					$(this).parents('.content').next('.clear').hide();
+				} 
+
+				if($(this).parents('.content').prev('.label').find('strong').text() == 'Color Override:') {
+					$(this).parents('.content').hide();
+					$(this).parents('.content').prev('.label').hide();
+					$(this).parents('.content').next('.clear').hide();
+				} 
+
+			});
+
+			$('#hover_text_color_override').parents('.content').hide();
+			$('#hover_text_color_override').parents('.content').prev('.label').hide();
+			$('#hover_text_color_override').parents('.content').next('.clear').hide();
+
+			//$('#options-button [name="icon-set-select"]').parents('.content').hide();
+			//$('#options-button [name="icon-set-select"]').parents('.content').prev('.label').hide();
+			//$('#options-button [name="icon-set-select"]').parents('.content').next('.clear').hide();
+
 		} else {
 			$('#options-button input.popup-colorpicker').each(function(){
 				
@@ -559,10 +619,20 @@ jQuery(document).ready(function($){
 					$(this).parents('.content').prev('.label').hide();
 					$(this).parents('.content').next('.clear').hide();
 				} 
+
+				if($(this).parents('.content').prev('.label').find('strong').text() == 'Color Override:') {
+					$(this).parents('.content').show();
+					$(this).parents('.content').prev('.label').show();
+					$(this).parents('.content').next('.clear').show();
+				} 
 				
 				$('#hover_text_color_override').parents('.content').hide();
 				$('#hover_text_color_override').parents('.content').prev('.label').hide();
 				$('#hover_text_color_override').parents('.content').next('.clear').hide();
+
+				//$('#options-button [name="icon-set-select"]').parents('.content').show();
+				//$('#options-button [name="icon-set-select"]').parents('.content').prev('.label').show();
+				//$('#options-button [name="icon-set-select"]').parents('.content').next('.clear').show();
 				
 			});
 		}

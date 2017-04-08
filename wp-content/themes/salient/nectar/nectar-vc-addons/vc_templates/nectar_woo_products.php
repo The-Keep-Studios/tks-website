@@ -105,7 +105,7 @@ if ( $products->have_posts() ) : ?>
 	
 	<?php if($carousel == '1') { ?> <div class="carousel-wrap products-carousel" data-controls="<?php echo $controls_on_hover ?>"> <?php } ?>
 
-	<?php woocommerce_product_loop_start(); ?>
+	<?php wc_get_template( 'loop/loop-start.php' ); ?>
 
 		<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
@@ -113,7 +113,7 @@ if ( $products->have_posts() ) : ?>
 
 		<?php endwhile; // end of the loop. ?>
 
-	<?php woocommerce_product_loop_end(); ?>
+	<?php  wc_get_template( 'loop/loop-end.php' ); ?>
 
 	<?php if($carousel == '1') { ?> </div> <?php } ?>
 

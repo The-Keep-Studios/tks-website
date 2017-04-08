@@ -95,7 +95,20 @@
         context._recalculateSections();
       }, 1000);
 
+      /* nectar addition */ 
+      setInterval(function(){
 
+        context._sections = [];
+        context._setupHeaders();
+
+        context._recalculateSections();
+        context._updateHeaderHeight();
+        context._recalculateHeaders();
+        context._updateHeaders();
+
+      }, 100);
+
+      /* nectar addition end */ 
       // We need to recalculate all this._sections and headers on resize.
       $(window).resize(function(){
         context.recalculate();
@@ -460,6 +473,7 @@
         
 
         if( this._headers[ix].from === 'top' ){
+
           if( this._transformMode !== false ) {
             this._headers[ix].element[0].style[this._transformMode] = 'translateY(-'+ offset +'%) translateZ(0)';
             this._headers[ix].inner[0].style[this._transformMode]   = 'translateY(+'+ offset +'%) translateZ(0)';

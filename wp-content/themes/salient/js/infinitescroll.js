@@ -151,10 +151,19 @@
 			var self = this;
 
             // determine loading.start actions
+            if($('#post-area.infinite_scroll').length > 0) { 
+                if($('#post-area.infinite_scroll.span_9').length > 0) {
+                    var $locationToAppend = '#sidebar';
+                } else {
+                    var $locationToAppend = '#post-area.infinite_scroll';
+                }
+            } else { 
+                var $locationToAppend = '.portfolio-items.infinite_scroll';
+            }
             opts.loading.start = opts.loading.start || function() {
                 $(opts.navSelector).hide();
                 opts.loading.msg
-                .appendTo('.container-wrap')
+                .insertAfter($locationToAppend)
                 .show(0, $.proxy(function() {
 					this.beginAjax(opts);
 				}, self)).transition({ scale: 1, 'opacity':1,'height':60,'padding-top':35, 'padding-bottom':35 },400,'easeOutCubic');

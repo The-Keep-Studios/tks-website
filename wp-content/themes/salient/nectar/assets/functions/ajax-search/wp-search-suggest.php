@@ -1,5 +1,7 @@
 <?php
-
+	
+	defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+	
     add_action( 'init', 'myprefix_autocomplete_init' );  
     function myprefix_autocomplete_init() {  
         // Register our jQuery UI style and our custom javascript file  
@@ -19,10 +21,7 @@
 	function myprefix_autocomplete_search_form(){  
         wp_enqueue_script( 'my_acsearch' );  
     }  
-	
-	add_action( 'wp_ajax_{action}', 'my_hooked_function' );  
-	add_action( 'wp_ajax_nopriv_{action}', 'my_hooked_function' );
-	
+		
 	
 	function myprefix_autocomplete_suggestions(){  
 

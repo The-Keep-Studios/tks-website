@@ -65,6 +65,7 @@
                     parent.find('.importer-button:not(#wbc-importer-reimport)').removeClass('button-primary').addClass('button').text('Imported').show();
                     parent.find('.importer-button').attr('style', '');
                     parent.addClass('imported active').removeClass('not-imported');
+                    location.reload(true);
                 } else {
                     parent.find('.import-demo-data').show();
 

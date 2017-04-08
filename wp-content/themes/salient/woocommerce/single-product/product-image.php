@@ -5,7 +5,7 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.0.14
+ * @version     2.6.3
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -28,16 +28,14 @@ if(!empty($options['single_product_gallery_type']) && $options['single_product_g
 
 				<?php if (has_post_thumbnail()) { 
 
-					$img_src = wp_get_attachment_image_src(get_post_thumbnail_id($post->ID), false, '');
-					$img_src_small = wp_get_attachment_image_src(get_post_thumbnail_id($post->ID),  'shop_single');
-					$img_src_title = get_post(get_post_thumbnail_id())->post_title;
+					$img_link = wp_get_attachment_url( get_post_thumbnail_id($post->ID) );
 					
 				?>
              
                 <div class="slide">
                 	<div class="easyzoom">
-	                	<a href="<?php echo $img_src[0] ?>">
-	                		<img src="<?php echo $img_src_small[0]; ?>" title="<?php echo $img_src_title; ?>" alt="<?php echo $img_src_title; ?>" />
+	                	<a href="<?php echo $img_link; ?>">
+	                		<?php echo wp_get_attachment_image( get_post_thumbnail_id($post->ID), 'shop_single'); ?>
 	                	</a>
 	                </div>
                 </div>
@@ -46,27 +44,27 @@ if(!empty($options['single_product_gallery_type']) && $options['single_product_g
 					echo '<div class="slide">'.apply_filters( 'woocommerce_single_product_image_html', sprintf( '<img src="%s" alt="%s" />', wc_placeholder_img_src(), __( 'Placeholder', 'woocommerce' ) ), $post->ID ) .'</div>';
 				}
 
-					if ( $product_attach_ids ) {
+				if ( $product_attach_ids ) {
 
-						foreach ($product_attach_ids as $product_attach_id) {
+					foreach ($product_attach_ids as $product_attach_id) {
 
-							$img_link = wp_get_attachment_url( $product_attach_id );
+						$img_link = wp_get_attachment_url( $product_attach_id );
+			
+						if (!$img_link)
+							continue;
+
+						printf( '<div class="slide"><div class="easyzoom"><a href="%s" title="%s"> %s </a></div></div>', wp_get_attachment_url($product_attach_id),esc_attr( get_post($product_attach_id)->post_title ), wp_get_attachment_image($product_attach_id, 'shop_single'));
 				
-							if (!$img_link)
-								continue;
-
-							printf( '<div class="slide"><div class="easyzoom"><a href="%s" title="%s"> %s </a></div></div>', wp_get_attachment_url($product_attach_id),get_post($product_attach_id)->post_title, wp_get_attachment_image($product_attach_id, 'shop_single'));
-					
-						}
 					}
-				?>
+				}
+			?>
 			
 			</div>
          	
     		<div class="slider_controls">
 				 <div class="nav_wrap">
-		       		 <a href="#" class="prev_slide" onclick="return false;"><span class="icon-angle-left"></span></a>
-		       		 <a href="#" class="next_slide" onclick="return false;"><span class="icon-angle-right"></span></a>
+		       		 <a href="#" class="prev_slide" onclick="return false;"><span class="fa fa-angle-left"></span></a>
+		       		 <a href="#" class="next_slide" onclick="return false;"><span class="fa fa-angle-right"></span></a>
 		        </div>
        		</div>
 		</div>
@@ -126,27 +124,26 @@ else { ?>
 
 	<?php
 		if ( has_post_thumbnail() ) {
-
-			$image_title = esc_attr( get_the_title( get_post_thumbnail_id() ) );
-			$image_link  = wp_get_attachment_url( get_post_thumbnail_id() );
-			$image       = get_the_post_thumbnail( $post->ID, apply_filters( 'single_product_large_thumbnail_size', 'shop_single' ), array(
-				'title' => $image_title
-				) );
-
 			$attachment_count = count( $product->get_gallery_attachment_ids() );
-
-			if ( $attachment_count > 0 ) {
-				$gallery = '[product-gallery]';
-			} else {
-				$gallery = '';
-			}
-
-			echo apply_filters( 'woocommerce_single_product_image_html', sprintf( '<a href="%s" itemprop="image" class="woocommerce-main-image zoom" title="%s" data-rel="prettyPhoto' . $gallery . '">%s</a>', $image_link, $image_title, $image ), $post->ID );
-
+			$gallery          = $attachment_count > 0 ? '[product-gallery]' : '';
+			$props            = wc_get_product_attachment_props( get_post_thumbnail_id(), $post );
+			$image            = get_the_post_thumbnail( $post->ID, apply_filters( 'single_product_large_thumbnail_size', 'shop_single' ), array(
+				'title'	 => $props['title'],
+				'alt'    => $props['alt'],
+			) );
+			echo apply_filters(
+				'woocommerce_single_product_image_html',
+				sprintf(
+					'<a href="%s" itemprop="image" class="woocommerce-main-image zoom" title="%s" data-rel="prettyPhoto%s">%s</a>',
+					esc_url( $props['url'] ),
+					esc_attr( $props['caption'] ),
+					$gallery,
+					$image
+				),
+				$post->ID
+			);
 		} else {
-
 			echo apply_filters( 'woocommerce_single_product_image_html', sprintf( '<img src="%s" alt="%s" />', wc_placeholder_img_src(), __( 'Placeholder', 'woocommerce' ) ), $post->ID );
-
 		}
 	?>
 

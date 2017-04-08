@@ -15,7 +15,7 @@
       var settings = $.extend({
         'footerID': '',
         'contentID': '',
-        'orientation': $(this).css('float')
+        'orientation': 'right'
       }, options);
 
       var sticky = {

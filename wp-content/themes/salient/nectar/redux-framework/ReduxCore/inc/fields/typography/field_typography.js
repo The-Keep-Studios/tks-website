@@ -531,7 +531,7 @@
                 if ( style && style !== "" ) {
                     link += ':' + style.replace( /\-/g, " " );
                 }
-
+				
                 if ( script && script !== "" ) {
                     link += '&subset=' + script;
                 }
